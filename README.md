@@ -1,8 +1,5 @@
-AuguryProject
-
-Pontifex Augur — a Roman-style omen interpreter driven by llama.cpp.
-
-⸻
+# Pontifex Augur
+#### a Roman-style omen interpreter driven by llama.cpp.
 
 ## Setup Instructions
 
@@ -20,10 +17,6 @@ source .venv/bin/activate
 ```
 pip install -r requirements.txt
 ```
-If no requirements.txt, install manually:
-```
-pip install llama-cpp-python pyyaml
-```
 ### 4. Place Your Model
 
 Download a quantized .gguf file (e.g. Meta-Llama-3-8B-Instruct) and place it in:
@@ -37,7 +30,6 @@ curl -L -o models/llama3-8B-q4_k_m.gguf \
 ```
 
 
-⸻
 
 ## Usage
 
@@ -47,7 +39,6 @@ echo '{"species": "corvus corax", "side": "dexter"}' | python augur.py
 ```
 Output will be a stylized Roman proclamation with the omen result.
 
-⸻
 
 ## Dev Notes
 	•	All llama.cpp output (Metal, ggml, perf) is suppressed.
@@ -55,7 +46,6 @@ Output will be a stylized Roman proclamation with the omen result.
 	•	Rule logic is handled by rules/engine.py.
 	•	Inference uses llama_cpp.Llama with chat-style prompting.
 
-⸻
 
 ## Project Structure
 ```
@@ -70,14 +60,13 @@ AuguryProject/
 └── .venv/                   # Optional virtualenv
 ```
 
-⸻
 
 ## Credits
 
 Created by Mike Cassidy + Kristian North.
 
-⸻
+
 
 ## License
 
-MIT or Roman Republic Public License — TBD
+Roman Republic Public License
