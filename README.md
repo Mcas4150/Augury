@@ -1,5 +1,5 @@
 # Pontifex Augur
-#### a Roman-style omen interpreter driven by llama.cpp.
+A Roman omen interpreter driven by llama.cpp.
 
 ## Setup Instructions
 
@@ -17,18 +17,12 @@ source .venv/bin/activate
 ```
 pip install -r requirements.txt
 ```
-### 4. Place Your Model
+### 4. Download Model
 
-Download a quantized .gguf file (e.g. Meta-Llama-3-8B-Instruct) and place it in:
-
-models/llama3-8B-q4_k_m.
-
-run:
 ```
 curl -L -o models/llama3-8B-q4_k_m.gguf \
   https://huggingface.co/bartowski/Meta-Llama-3-8B-Instruct-GGUF/resolve/main/Meta-Llama-3-8B-Instruct-Q4_K_M.gguf
 ```
-
 
 
 ## Usage
@@ -51,6 +45,7 @@ Output will be a stylized Roman proclamation with the omen result.
 ```
 AuguryProject/
 ├── augur.py                 # Entry point
+├── api.py                   # REST api
 ├── rules/
 │   └── engine.py            # Rule engine logic
 ├── models/
@@ -69,4 +64,4 @@ Created by Mike Cassidy + Kristian North.
 
 ## License
 
-Roman Republic Public License
+Res Publica License
