@@ -9,80 +9,65 @@ interface Boid {
   vx: number;
   vy: number;
 }
-interface CloudParticle {
-  dx: number;
-  dy: number;
-  radius: number;
-  alpha: number;
+
+interface BoidsCanvasProps {
+  trigger?: number; // used to “jolt” the system if you ever want
+  isConsulting?: boolean; // when true, boids speed ↑ and color changes
 }
 
-/**
- * BoidsCanvas.tsx
- * Standard boids flocking with fluffy, visible cloud clusters at the top.
- * Resizes to its parent container via absolute positioning.
- */
-export default function BoidsCanvas({ trigger }: { trigger?: number }) {
+export default function BoidsCanvas({
+  trigger,
+  isConsulting = false,
+}: BoidsCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  // we’ll keep our boids and loop handle in refs so they survive re-renders
+  const boidsRef = useRef<Boid[]>([]);
+  const rafRef = useRef<number>(0);
+
+  // a ref to hold the latest consulting flag inside our animation loop
+  const consultingRef = useRef(isConsulting);
+  consultingRef.current = isConsulting;
+
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const canvas = canvasRef.current!;
+    const ctx = canvas.getContext("2d")!;
+    const parent = canvas.parentElement!;
+    const W = (canvas.width = parent.clientWidth);
+    const H = (canvas.height = parent.clientHeight);
 
-    const parent = canvas.parentElement;
-    const width = parent?.clientWidth ?? 400;
-    const height = parent?.clientHeight ?? 400;
-    canvas.width = width;
-    canvas.height = height;
-
-    // BOIDS SETUP
+    // initialize boids only once
     const boids: Boid[] = Array.from({ length: 50 }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
+      x: Math.random() * W,
+      y: Math.random() * H,
       vx: (Math.random() - 0.5) * 2,
       vy: (Math.random() - 0.5) * 2,
     }));
-    const maxSpeed = 2;
-    const perception = 50;
+    boidsRef.current = boids;
+
+    const baseMaxSpeed = 2;
+    const basePerception = 50;
     const steerFactor = 0.05;
 
-    // CLOUD SETUP — each cloud is 5–8 overlapping puffs
-    const clouds: {
-      x: number;
-      y: number;
-      speed: number;
-      particles: CloudParticle[];
-    }[] = Array.from({ length: 48 }, () => {
-      const baseR = 5 + Math.random() * 25;
-      const particles: CloudParticle[] = Array.from(
-        { length: 5 + Math.floor(Math.random() * 4) },
-        () => ({
-          dx: (Math.random() - 0.5) * baseR * 1.2,
-          dy: (Math.random() - 0.5) * baseR * 0.5,
-          radius: baseR * (0.6 + Math.random() * 0.4),
-          alpha: 0.1 + Math.random() * 0.2,
-        })
-      );
-      return {
-        x: Math.random() * width,
-        y: Math.random() * (height * 0.15) + 350,
-        speed: 0.1 + Math.random() * 0.3,
-        particles,
-      };
-    });
-
     function updateBoids() {
+      const isConsult = consultingRef.current;
+      const speedMultiplier = isConsult ? 3 : 1; // double speed when consulting
+      const color = isConsult ? "#88ddff" : "#ffffff"; // red when consulting
+
+      // store for draw
+      (ctx as any)._boidColor = color;
+
       boids.forEach((b) => {
         let align = { x: 0, y: 0 },
           coh = { x: 0, y: 0 },
           sep = { x: 0, y: 0 };
         let total = 0;
-        boids.forEach((o) => {
-          const dx = o.x - b.x;
-          const dy = o.y - b.y;
-          const d = Math.hypot(dx, dy);
-          if (o !== b && d < perception) {
+
+        for (let o of boids) {
+          const dx = o.x - b.x,
+            dy = o.y - b.y,
+            d = Math.hypot(dx, dy);
+          if (o !== b && d < basePerception) {
             align.x += o.vx;
             align.y += o.vy;
             coh.x += o.x;
@@ -91,66 +76,72 @@ export default function BoidsCanvas({ trigger }: { trigger?: number }) {
             sep.y += b.y - o.y;
             total++;
           }
-        });
+        }
+
         if (total > 0) {
           align.x /= total;
           align.y /= total;
           coh.x = coh.x / total - b.x;
           coh.y = coh.y / total - b.y;
+
           b.vx +=
             align.x * steerFactor + coh.x * steerFactor + sep.x * steerFactor;
           b.vy +=
             align.y * steerFactor + coh.y * steerFactor + sep.y * steerFactor;
         }
+
+        // limit speed
         const speed = Math.hypot(b.vx, b.vy);
+        const maxSpeed = baseMaxSpeed * speedMultiplier;
         if (speed > maxSpeed) {
           b.vx = (b.vx / speed) * maxSpeed;
           b.vy = (b.vy / speed) * maxSpeed;
         }
-        b.x = (b.x + b.vx + width) % width;
-        b.y = (b.y + b.vy + height) % height;
-      });
-    }
 
-    function updateClouds() {
-      clouds.forEach((c) => {
-        c.x += c.speed;
-        if (c.x - 100 > width) c.x = -100;
-      });
-    }
-
-    function drawClouds() {
-      clouds.forEach((c) => {
-        c.particles.forEach((p) => {
-          ctx.fillStyle = `rgba(255,255,255,${p.alpha})`;
-          ctx.beginPath();
-          ctx.arc(c.x + p.dx, c.y + p.dy, p.radius, 0, Math.PI * 2);
-          ctx.fill();
-        });
+        // move & wrap
+        b.x = (b.x + b.vx + W) % W;
+        b.y = (b.y + b.vy + H) % H;
       });
     }
 
     function drawBoids() {
-      ctx.fillStyle = "#fff";
-      boids.forEach((b) => {
+      ctx.clearRect(0, 0, W, H);
+
+      // if consulting, enable glow
+      if (consultingRef.current) {
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "#88ddff";
+      } else {
+        ctx.shadowBlur = 0;
+      }
+
+      ctx.fillStyle = (ctx as any)._boidColor || "#fff";
+      for (let b of boidsRef.current) {
         ctx.beginPath();
-        ctx.arc(b.x, b.y, 1.25, 0, Math.PI * 2);
+        ctx.arc(b.x, b.y, 1.5, 0, Math.PI * 2);
         ctx.fill();
-      });
+      }
+      ctx.shadowBlur = 0;
     }
 
-    let raf: number;
-    const loop = () => {
-      // updateClouds();
+    // main loop
+    function loop() {
       updateBoids();
-      ctx.clearRect(0, 0, width, height);
-      // drawClouds();
       drawBoids();
-      raf = requestAnimationFrame(loop);
-    };
+      rafRef.current = requestAnimationFrame(loop);
+    }
     loop();
 
-    return () => cancelAnimationFrame(raf);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, []); // <-- only run on mount
+
+  // if you ever want to “jolt” things on `trigger`, you can react to it here:
+  useEffect(() => {
+    // e.g. reset velocities randomly
+    boidsRef.current.forEach((b) => {
+      b.vx = (Math.random() - 0.5) * 2;
+      b.vy = (Math.random() - 0.5) * 2;
+    });
   }, [trigger]);
 
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />;

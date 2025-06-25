@@ -43,7 +43,7 @@ export default function AuguryApp() {
       {/* left panel */}
       <div className="md:w-1/2 flex flex-col items-center p-6 space-y-6">
         <div className="relative w-full h-[384px]">
-          <BoidsCanvas trigger={boidTrigger} judgement={judgement} />
+          <BoidsCanvas trigger={boidTrigger} isConsulting={loading} />
         </div>
         <div className="relative w-full h-[384px]">
           <Image
