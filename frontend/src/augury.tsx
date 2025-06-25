@@ -1,38 +1,39 @@
 "use client"
 import Image from "next/image";
-import { useState } from "react"
+import BoidsCanvas from "./boidsCanvas";
+import { useState } from "react";
 
 export default function AuguryApp() {
-  const [species, setSpecies] = useState("")
-  const [side, setSide] = useState("")
-  const [proclamation, setProclamation] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [species, setSpecies] = useState("");
+  const [side, setSide] = useState("");
+  const [proclamation, setProclamation] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [boidTrigger, setBoidTrigger] = useState(0);
 
   const handleSubmit = async () => {
-    setLoading(true)
-    setProclamation("")
+    setLoading(true);
+    setProclamation("");
     try {
-      const res = await fetch(
-        `http://localhost:8000/proclaim`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ species, side }),
-        }
-      )
-      const data = await res.json()
-      setProclamation(data.proclamation)
+      const res = await fetch(`http://localhost:8000/proclaim`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ species, side }),
+      });
+      const data = await res.json();
+      setProclamation(data.proclamation);
+      setBoidTrigger(Date.now());
     } catch {
-      setProclamation(
-        "⚠️ Error invoking the augur. Check server connection."
-      )
+      setProclamation("⚠️ Error invoking the augur. Check server connection.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 space-y-6">
+      <div className="relative w-[512px] h-[384px]">
+        <BoidsCanvas trigger={boidTrigger} />
+      </div>
       <div className="relative w-[512px] h-[384px]">
         <Image
           src="/media/augury2.png"
@@ -73,5 +74,5 @@ export default function AuguryApp() {
         </div>
       )}
     </div>
-  )
+  );
 }
