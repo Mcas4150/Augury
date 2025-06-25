@@ -53,11 +53,13 @@ export default function AuguryApp() {
             style={{ objectFit: "contain" }}
           />
         </div>
-        <h1 className="text-4xl font-bold tracking-widest">PONTIFEX AUGUR</h1>
       </div>
 
       {/* right panel */}
       <div className="md:w-1/2 flex flex-col justify-start p-6 space-y-6">
+        <h1 className="text-4xl font-roman font-bold tracking-widest">
+          PONTIFEX AUGUR
+        </h1>
         {/* •–– input nested at top ––• */}
         <div className="flex space-x-2">
           <input
@@ -91,7 +93,7 @@ export default function AuguryApp() {
 
         {proclamation && (
           <div className="bg-white text-black p-6 rounded-lg shadow-lg overflow-auto">
-            <pre className="whitespace-pre-wrap">{proclamation}</pre>
+            <div className="whitespace-pre-wrap font-roman">{proclamation}</div>
           </div>
         )}
       </div>

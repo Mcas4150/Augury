@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -116,7 +120,12 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
+  @tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
     @apply bg-background text-foreground;
+    font-family: var(--font-roman) !important;
   }
 }
