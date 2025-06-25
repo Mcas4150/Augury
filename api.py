@@ -6,11 +6,11 @@ import subprocess
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from fastapi.responses import FileResponse
 
 import edge_tts
 
-from augur import omen, get_llm  # lazy-loader exposed
+from augur import omen, get_llm         # lazy-loader exposed
+from rules.engine import evaluate_omen   # to extract raw judgement
 
 app = FastAPI(title="Augury API", docs_url="/docs")
 
@@ -35,9 +35,11 @@ class OmenRequest(BaseModel):
 
 class OmenResponse(BaseModel):
     proclamation: str
+    judgement: str
 
 class AudioResponse(BaseModel):
     proclamation: str
+    judgement: str
     audio_base64: str
 
 # ── Text-only endpoint ───────────────────────────────────────────────────
@@ -45,8 +47,13 @@ class AudioResponse(BaseModel):
 def proclaim(req: OmenRequest):
     try:
         get_llm()  # ensure model is loaded once
-        text = omen(req.dict())
-        return {"proclamation": text}
+        facts = req.dict()
+        # raw judgement from rules.engine
+        outcome = evaluate_omen(facts)
+        judgement = outcome["omen"]
+        # natural language proclamation
+        text = omen(facts)
+        return {"proclamation": text, "judgement": judgement}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
@@ -55,8 +62,11 @@ def proclaim(req: OmenRequest):
 async def proclaim_audio(req: OmenRequest):
     try:
         get_llm()
+        facts = req.dict()
+        outcome = evaluate_omen(facts)
+        judgement = outcome["omen"]
         # 1) generate text
-        text = omen(req.dict())
+        text = omen(facts)
 
         # 2) synthesize to temp file
         tmpfile = f"/tmp/omen_{uuid.uuid4().hex}.mp3"
@@ -71,11 +81,11 @@ async def proclaim_audio(req: OmenRequest):
         # 4) optionally play locally
         subprocess.Popen(["afplay", tmpfile], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-        # 5) cleanup temp file
+        # 5) cleanup
         os.remove(tmpfile)
 
-        # 6) return both
-        return {"proclamation": text, "audio_base64": b64}
+        # 6) return both text, judgement, and audio
+        return {"proclamation": text, "judgement": judgement, "audio_base64": b64}
 
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))

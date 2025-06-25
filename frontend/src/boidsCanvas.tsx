@@ -256,17 +256,17 @@ export default function BoidsCanvas({ trigger }: { trigger?: number }) {
       ctx.fillStyle = "#fff";
       boids.forEach((b) => {
         ctx.beginPath();
-        ctx.arc(b.x, b.y, 3, 0, Math.PI * 2);
+        ctx.arc(b.x, b.y, 1.25, 0, Math.PI * 2);
         ctx.fill();
       });
     }
 
     let raf: number;
     const loop = () => {
-      updateClouds();
+      // updateClouds();
       updateBoids();
       ctx.clearRect(0, 0, width, height);
-      drawClouds();
+      // drawClouds();
       drawBoids();
       raf = requestAnimationFrame(loop);
     };
