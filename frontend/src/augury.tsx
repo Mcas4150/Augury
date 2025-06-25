@@ -1,4 +1,5 @@
 "use client"
+
 import Image from "next/image";
 import BoidsCanvas from "./boidsCanvas";
 import { useState } from "react";
@@ -14,14 +15,19 @@ export default function AuguryApp() {
     setLoading(true);
     setProclamation("");
     try {
-      const res = await fetch(`http://localhost:8000/proclaim`, {
+      const res = await fetch(`http://localhost:8000/proclaim/audio`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ species, side }),
       });
       const data = await res.json();
+      // display text
       setProclamation(data.proclamation);
+      // trigger boid behavior change
       setBoidTrigger(Date.now());
+      // play returned audio
+      const audio = new Audio(`data:audio/mpeg;base64,${data.audio_base64}`);
+      audio.play();
     } catch {
       setProclamation("⚠️ Error invoking the augur. Check server connection.");
     } finally {
