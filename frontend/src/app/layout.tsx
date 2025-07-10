@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cinzel } from "next/font/google";
 import "./globals.css";
+import Link from 'next/link';
 
 const cinzel = Cinzel({
   weight: ["400", "700"],
@@ -21,7 +22,26 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${cinzel.variable} antialiased bg-black text-white`}>
-        {children}
+        <header>
+          <nav style={{ padding: '20px', borderBottom: '1px solid #555', marginBottom: '20px' }}>
+  <Link href="/" style={{ marginRight: '20px', fontSize: '18px' }}>
+    Home
+  </Link>
+  <Link href="/augury" style={{ marginRight: '20px', fontSize: '18px' }}>
+    Augury
+  </Link>
+  <Link href="/swarmscape" style={{ marginRight: '20px', fontSize: '18px' }}>
+    Swarmscape
+  </Link>
+  <Link href="/docs" style={{ fontSize: '18px' }}>
+    Documentation
+  </Link>
+</nav>
+        </header>
+
+        <main style={{ padding: '20px' }}>
+          {children}
+        </main>
       </body>
     </html>
   );
