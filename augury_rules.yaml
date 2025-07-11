@@ -1,5 +1,49 @@
+synonyms:
+  raven:            "corvus corax"
+  crow:             "corvus brachyrhynchos"
+  carrion_crow:     "corvus corone"
+  hooded_crow:      "corvus cornix"
+  magpie:           "pica pica"
+  starling:         "sturnus vulgaris"
+  robin:            "turdus migratorius"
+  blue_jay:         "cyanocitta cristata"
+  peregrine_falcon: "falco peregrinus"
+  red_tailed_hawk:  "buteo jamaicensis"
+  golden_eagle:     "aquila chrysaetos"
+  condor:           "vultur gryphus"
+
 oscines:
-  corvus corax: favourable
+  corvus corax:      favourable
+  corvus corone:     inafaustum
+  pica pica:         inafaustum
+  sturnus vulgaris:  favourable
+  turdus migratorius: incertum
+  cyanocitta cristata: inafaustum
+
+alites:
+  aquila chrysaetos:  favourable
+  vultur gryphus:     favourable
+  falco peregrinus:   favourable
+  buteo jamaicensis:  inafaustum
+
+# you can even add other “classes” of omen:
+waterfowl:
+  anas platyrhynchos: incertum
+  branta canadensis:  inafaustum
+
+serpentes:
+  natrix natrix:      inafaustum
+  vipera berus:       dirum
+
 sides:
-  dexter: favourable
+  dexter:   favourable
   sinister: unfavourable
+
+side_synonyms:
+  right:  "dexter"
+  left:   "sinister"
+
+outcomes:
+  faustum:    "Faustum augurium"
+  inafaustum: "Dirum augurium"
+  incertum:   "Omen incertum"

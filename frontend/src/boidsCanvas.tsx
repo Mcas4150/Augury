@@ -98,6 +98,31 @@ export default function BoidsCanvas({
           b.vy = (b.vy / speed) * maxSpeed;
         }
 
+                if (isConsult) {
+                  // center of canvas
+                  const cx = W / 2;
+                  const cy = H / 2;
+                  // vector from center to boid
+                  const dx = b.x - cx;
+                  const dy = b.y - cy;
+                  const dist = Math.hypot(dx, dy) || 1;
+                  // perpendicular (–dy, dx) to create circular motion
+                  const perpX = -dy / dist;
+                  const perpY = dx / dist;
+                  // how strongly they spiral
+                  const spiralStrength = 1.5;
+
+                  // **new** radial pull
+                  const pullStrength = 0.5; // tweak between 0 = no pull, up to ~1 for very tight pull
+                  const inwardX = -dx / dist;
+                  const inwardY = -dy / dist;
+
+                  b.vx += perpX * spiralStrength + inwardX * pullStrength;
+                  b.vy += perpY * spiralStrength + inwardY * pullStrength;
+                  // b.vx += perpX * spiralStrength;
+                  // b.vy += perpY * spiralStrength;
+                }
+
         // move & wrap
         b.x = (b.x + b.vx + W) % W;
         b.y = (b.y + b.vy + H) % H;
