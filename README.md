@@ -14,8 +14,14 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 ### 3. Install Dependencies
+backend:
 ```
 pip install -r requirements.txt
+```
+frontend:
+```
+cd frontend
+npm install
 ```
 ### 4. Download Model
 
@@ -27,12 +33,15 @@ curl -L -o models/llama3-8B-q4_k_m.gguf \
 
 ## Usage
 
-Basic Invocation
+Run Backend
 ```
-echo '{"species": "corvus corax", "side": "dexter"}' | python augur.py
+uvicorn api:app --reload --port 8000
 ```
-Output will be a stylized Roman proclamation with the omen result.
-
+Run Fronend
+```
+cd frontend
+npm run dev
+```
 
 ## Dev Notes
 	•	All llama.cpp output (Metal, ggml, perf) is suppressed.
