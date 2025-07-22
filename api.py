@@ -16,7 +16,8 @@ app = FastAPI(title="Augury API", docs_url="/docs")
 
 # ── CORS ────────────────────────────────────────────────────────────────
 origins = [
-    "http://localhost:3000",   # Next.js dev
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",  # Next.js dev
     # production origins here...
 ]
 
