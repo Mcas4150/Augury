@@ -128,4 +128,42 @@ body {
     @apply bg-background text-foreground;
     font-family: var(--font-roman) !important;
   }
+
+/* -- Custom Cursor Styles -- */
+
+* {
+  cursor: url("/media/Dove Cursor.cur"), auto !important;
+}
+
+a, button, [role="button"], .hover\\:cursor-pointer {
+  cursor: url("/media/Help Select.cur"), pointer !important;
+}
+/* -- Marquee -- */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-scroll-left {
+  animation: scroll-left 60s linear infinite;
+}
+/* -- Wavey -- */
+@keyframes wave {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.wavy-letter {
+  display: inline-block;
+  position: relative;
+  animation: wave 1.5s ease-in-out infinite;
+}
 }

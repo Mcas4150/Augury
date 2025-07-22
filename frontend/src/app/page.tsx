@@ -1,10 +1,19 @@
+import Link from 'next/link';
+import Image from 'next/image';
+
 export default function HomePage() {
   return (
-    <div className="text-center pt-20">
-      <h1 className="text-5xl font-roman">Enter the Templum</h1>
-      <p className="mt-4 text-lg">
-        Use the navigation above
-      </p>
-    </div>
+    <main>
+      <Link href="/augury" className="block w-screen h-screen relative">
+        <Image
+          src="/media/Gate2.png" // CHANGE to your image name
+          alt="Enter the Templum"
+          layout="fill"
+          objectFit="cover"
+          quality={100}
+          priority
+        />
+      </Link>
+    </main>
   );
 }
