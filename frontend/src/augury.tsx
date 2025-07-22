@@ -58,7 +58,7 @@ export default function AuguryApp() {
       {/* right panel */}
       <div className="md:w-1/2 flex flex-col justify-start p-6 space-y-6">
         <h1 className="text-4xl font-roman font-bold tracking-widest">
-          PONTIFEX AUGUR
+          Consult the Augur
         </h1>
         {/* •–– input nested at top ––• */}
         <div className="flex space-x-2">
