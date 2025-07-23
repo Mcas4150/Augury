@@ -1,13 +1,13 @@
 import BoidsComponent from '@/BoidsComponent';
 
 export default function SwarmscapePage() {
-  const quote = "Finite games can be played within an infinite game, but an infinite game cannot be played within a finite game. Infinite players regard their wins and losses in whatever finite games they play as but moments in continuing play. - James Carse";
+  const quote = "3 Rules: Cohesion Separation Alignment";
 
   return (
     <main className="flex flex-col items-center justify-start">
       <div className="w-full overflow-x-hidden">
         <div className="my-8 text-center">
-          <span className="inline-block whitespace-nowrap animate-scroll-left text-2xl italic font-roman">
+          <span className="inline-block whitespace-nowrap animate-scroll-left text-4xl italic font-roman">
             {quote.split('').map((char, index) => {
               if (char === ' ') {
                 return <span key={index}> </span>;
@@ -28,7 +28,6 @@ export default function SwarmscapePage() {
       
       {/* Centering container */}
       <div className="flex justify-center w-full px-4">
-        {/* The classes on this div create the circular frame */}
         <div className="relative w-[75vh] h-[75vh] border border-gray-700 rounded-full overflow-hidden">
            <BoidsComponent />
         </div>

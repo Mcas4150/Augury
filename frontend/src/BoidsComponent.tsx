@@ -23,9 +23,9 @@ const BoidsComponent = () => {
     };
 
     const flock = [];
-    const SPECIES_A_COUNT = 512;
-    const SPECIES_B_COUNT = 128;
-    const SPECIES_C_COUNT = 48;
+    const SPECIES_A_COUNT = 1000;
+    const SPECIES_B_COUNT = 500;
+    const SPECIES_C_COUNT = 200;
 
     const Species = { PREY: 0, PREDATOR: 1, ALPHA_PREDATOR: 2 };
 
@@ -36,6 +36,7 @@ const BoidsComponent = () => {
         this.acceleration = { x: 0, y: 0 };
         this.species = speciesType;
         
+        // --- PARAMETER TWEAK ---
         switch (this.species) {
             case Species.ALPHA_PREDATOR:
                 this.maxSpeed = 2.0;
@@ -48,7 +49,7 @@ const BoidsComponent = () => {
             case Species.PREY:
             default:
                 this.maxSpeed = 2.2;
-                this.maxForce = 0.08;
+                this.maxForce = 0.06; // Slightly reduced maxForce for smoother turns
                 break;
         }
       }
@@ -88,10 +89,11 @@ const BoidsComponent = () => {
         return {x: 0, y: 0};
       }
       
+      // --- PARAMETER TWEAK ---
       separate(boids) {
         let steer = { x: 0, y: 0 };
         let count = 0;
-        const desiredSeparation = 25;
+        const desiredSeparation = 35; // Increased from 25
 
         for (let other of boids) {
           let d = Math.hypot(this.position.x - other.position.x, this.position.y - other.position.y);
@@ -161,48 +163,51 @@ const BoidsComponent = () => {
         }
         return neighbors;
       }
-
+      
+      // --- PARAMETER TWEAK ---
       performBehaviors(boids) {
         const neighbors = this.getNeighbors(boids, 75);
         let force;
 
         if (mouse.active) {
-    force = this.seek(mouse); // Boids now follow
-    force.x *= 2; // A lower multiplier feels more natural for seeking
-    force.y *= 2;
-    this.applyForce(force);
-}
+            force = this.flee(mouse);
+            force.x *= 5;
+            force.y *= 5;
+            this.applyForce(force);
+        }
 
         switch (this.species) {
             case Species.PREY:
                 const predators = neighbors.filter(b => b.species === Species.PREDATOR);
                 if (predators.length > 0) {
-                    // Priority 1: Flee Predators
                     force = this.flee(predators[0].position);
                     force.x *= 5; force.y *= 5;
                     this.applyForce(force);
                 } else {
-                    // Priority 2: Hunt Alpha Predators
                     const alphaPredators = neighbors.filter(b => b.species === Species.ALPHA_PREDATOR);
                     if (alphaPredators.length > 0) {
                         force = this.seek(alphaPredators[0].position);
                         force.x *= 2; force.y *= 2;
                         this.applyForce(force);
                     }
-                    // Priority 3: Standard Flocking with other Prey
                     const preyNeighbors = neighbors.filter(b => b.species === Species.PREY);
                     if (preyNeighbors.length > 0) {
                         let separateForce = this.separate(preyNeighbors);
                         let alignForce = this.align(preyNeighbors);
                         let cohesionForce = this.cohesion(preyNeighbors);
-                        separateForce.x *= 2.0; separateForce.y *= 2.0;
+                        
+                        separateForce.x *= 3.0; // Greatly increased separation weight
+                        separateForce.y *= 3.0;
+                        cohesionForce.x *= 0.8; // Slightly reduced cohesion
+                        cohesionForce.y *= 0.8;
+
                         this.applyForce(separateForce);
                         this.applyForce(alignForce);
                         this.applyForce(cohesionForce);
                     }
                 }
                 break;
-
+            // Predator behaviors remain the same
             case Species.PREDATOR:
                 const prey = neighbors.filter(b => b.species === Species.PREY);
                 const alphaPredatorsForPredator = neighbors.filter(b => b.species === Species.ALPHA_PREDATOR);
@@ -216,7 +221,6 @@ const BoidsComponent = () => {
                     this.applyForce(force);
                 }
                 break;
-            
             case Species.ALPHA_PREDATOR:
                  const predatorsToHunt = neighbors.filter(b => b.species === Species.PREDATOR);
                  if (predatorsToHunt.length > 0) {
