@@ -26,8 +26,12 @@ export default function SwarmscapePage() {
         </div>
       </div>
       
-      <div className="w-full h-[540px]">
-         <BoidsComponent width={1280} height={720} />
+      {/* Centering container */}
+      <div className="flex justify-center w-full px-4">
+        {/* The classes on this div create the circular frame */}
+        <div className="relative w-[75vh] h-[75vh] border border-gray-700 rounded-full overflow-hidden">
+           <BoidsComponent />
+        </div>
       </div>
 
     </main>

@@ -1,7 +1,7 @@
 import GameComponent from '@/GameComponent';
 
 export default function GamePage() {
-  const quote = "Finite games can be played within an infinite game, but an infinite game cannot be played within a finite game. Infinite players regard their wins and losses in whatever finite games they play as but moments in continuing play - James Carse";
+  const quote = "Infinite players regard their wins and losses in whatever finite games they play as but moments in continuing play - James Carse";
 
   return (
     <main className="flex flex-col items-center justify-start">
