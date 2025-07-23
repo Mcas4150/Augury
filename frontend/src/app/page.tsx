@@ -14,10 +14,10 @@ export default function HomePage() {
         priority
       />
 
-      {/* Clickable Hotspot for the Door */}
+      {/* This link now points to the Passage page */}
       <Link
-        href="/augury"
-        title="Enter the Templum"
+        href="/passage"
+        title="Enter the Passage"
         className="absolute hover:cursor-pointer rounded-sm"
         style={{
           top: '52%',

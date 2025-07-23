@@ -27,6 +27,12 @@ export default function RootLayout({
             <Link href="/" style={{ marginRight: '20px', fontSize: '18px' }}>
               Home
             </Link>
+            <Link href="/passage" style={{ marginRight: '20px', fontSize: '18px' }}>
+              Passage
+            </Link>
+            <Link href="/birddoors" style={{ marginRight: '20px', fontSize: '18px' }}>
+              Bird Doors
+            </Link>
             <Link href="/augury" style={{ marginRight: '20px', fontSize: '18px' }}>
               Augury
             </Link>

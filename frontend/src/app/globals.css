@@ -149,7 +149,7 @@ a, button, [role="button"], .hover\\:cursor-pointer {
 }
 
 .animate-scroll-left {
-  animation: scroll-left 60s linear infinite;
+  animation: scroll-left 120s linear infinite;
 }
 /* -- Wavey -- */
 @keyframes wave {
