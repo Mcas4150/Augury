@@ -1,13 +1,13 @@
-import BoidsComponent from '@/BoidsComponent';
+import GameComponent from '@/GameComponent';
 
-export default function SwarmscapePage() {
-  const quote = "Finite games can be played within an infinite game, but an infinite game cannot be played within a finite game. Infinite players regard their wins and losses in whatever finite games they play as but moments in continuing play. - James Carse";
+export default function GamePage() {
+  const quote = "Finite games can be played within an infinite game, but an infinite game cannot be played within a finite game. Infinite players regard their wins and losses in whatever finite games they play as but moments in continuing play - James Carse";
 
   return (
     <main className="flex flex-col items-center justify-start">
       <div className="w-full overflow-x-hidden">
         <div className="my-8 text-center">
-          <span className="inline-block whitespace-nowrap animate-scroll-left text-2xl italic font-roman">
+          <span className="inline-block whitespace-nowrap animate-scroll-left text-4xl italic font-roman">
             {quote.split('').map((char, index) => {
               if (char === ' ') {
                 return <span key={index}> </span>;
@@ -25,11 +25,7 @@ export default function SwarmscapePage() {
           </span>
         </div>
       </div>
-      
-      <div className="w-full h-[540px]">
-         <BoidsComponent width={1280} height={720} />
-      </div>
-
+      <GameComponent width={960} height={540} />
     </main>
   );
 }
