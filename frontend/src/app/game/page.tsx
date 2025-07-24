@@ -1,7 +1,7 @@
-import BoidsComponent from '@/BoidsComponent';
+import GameComponent from '@/GameComponent';
 
-export default function SwarmscapePage() {
-  const quote = "3 Rules: Cohesion Separation Alignment";
+export default function GamePage() {
+  const quote = "Infinite players regard their wins and losses in whatever finite games they play as but moments in continuing play - James Carse";
 
   return (
     <main className="flex flex-col items-center justify-start">
@@ -25,14 +25,7 @@ export default function SwarmscapePage() {
           </span>
         </div>
       </div>
-      
-      {/* Centering container */}
-      <div className="flex justify-center w-full px-4">
-        <div className="relative w-[75vh] h-[75vh] border border-gray-700 rounded-full overflow-hidden">
-           <BoidsComponent />
-        </div>
-      </div>
-
+      <GameComponent width={960} height={540} />
     </main>
   );
 }

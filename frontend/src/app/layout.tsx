@@ -24,19 +24,28 @@ export default function RootLayout({
       <body className={`${cinzel.variable} antialiased bg-black text-white`}>
         <header>
           <nav style={{ padding: '20px', borderBottom: '1px solid #555', marginBottom: '20px' }}>
-  <Link href="/" style={{ marginRight: '20px', fontSize: '18px' }}>
-    Home
-  </Link>
-  <Link href="/augury" style={{ marginRight: '20px', fontSize: '18px' }}>
-    Augury
-  </Link>
-  <Link href="/swarmscape" style={{ marginRight: '20px', fontSize: '18px' }}>
-    Swarmscape
-  </Link>
-  <Link href="/docs" style={{ fontSize: '18px' }}>
-    Documentation
-  </Link>
-</nav>
+            <Link href="/" style={{ marginRight: '20px', fontSize: '18px' }}>
+              Home
+            </Link>
+            <Link href="/passage" style={{ marginRight: '20px', fontSize: '18px' }}>
+              Passage
+            </Link>
+            <Link href="/birddoors" style={{ marginRight: '20px', fontSize: '18px' }}>
+              Bird Doors
+            </Link>
+            <Link href="/augury" style={{ marginRight: '20px', fontSize: '18px' }}>
+              Augury
+            </Link>
+            <Link href="/swarmscape" style={{ marginRight: '20px', fontSize: '18px' }}>
+              Swarmscape
+            </Link>
+            <Link href="/game" style={{ marginRight: '20px', fontSize: '18px' }}>
+              Game
+            </Link>
+            <Link href="/docs" style={{ fontSize: '18px' }}>
+              Documentation
+            </Link>
+          </nav>
         </header>
 
         <main style={{ padding: '20px' }}>
