@@ -3,6 +3,7 @@
 import Image from "next/image";
 import BoidsCanvas from "./boidsCanvas";
 import { useState } from "react";
+import Birdnet from "./birdnet";
 
 export default function AuguryApp() {
   const [species, setSpecies] = useState("");
@@ -84,7 +85,7 @@ export default function AuguryApp() {
             {loading ? "Invoking..." : "Consult Augur"}
           </button>
         </div>
-
+        <Birdnet />
         {judgement && (
           <div className="text-xl">
             Judgement: <strong>{judgement}</strong>
