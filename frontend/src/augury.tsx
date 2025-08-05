@@ -3,6 +3,9 @@
 import Image from "next/image";
 import BoidsCanvas from "./boidsCanvas";
 import { useState } from "react";
+import { useWebSocket } from "./useWebsocket";
+
+const wsUrl = "ws://10.0.0.232:9987"; // TouchDesigner IP on LAN
 
 export default function AuguryApp() {
   const [species, setSpecies] = useState("");
@@ -12,7 +15,10 @@ export default function AuguryApp() {
   const [loading, setLoading] = useState(false);
   const [boidTrigger, setBoidTrigger] = useState(0);
 
+  const { send } = useWebSocket(wsUrl);
+
   const handleSubmit = async () => {
+    send("divinate");
     setLoading(true);
     setProclamation("");
     setJudgement(null);
