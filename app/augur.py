@@ -22,21 +22,12 @@ MODEL = pathlib.Path("models/llama3-8B-q4_k_m.gguf").expanduser()
 
 _llm = None
 def build_llm():
-<<<<<<< HEAD
     # with mute_native():
         return Llama(
             model_path=str(MODEL),
             n_ctx=2048,
             n_gpu_layers=20,            # Start with CPU-only
             verbose=False,
-=======
-    with mute_native():
-        return Llama(
-            model_path=str(MODEL),
-            n_ctx=2048,
-            n_gpu_layers=0,           # CPU-only wheel on Windows
-            verbose=False
->>>>>>> 9282a51 (birdnet working)
         )
 
 def get_llm():
