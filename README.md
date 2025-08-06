@@ -1,4 +1,7 @@
 # Pontifex Augur
+
+![Augury](https://github.com/Mcas4150/Augury/blob/master/frontend/public/media/augury2.png)
+
 A Roman omen interpreter driven by llama.cpp.
 
 ## Setup Instructions
