@@ -20,8 +20,6 @@ export default function AuguryApp() {
     try {
       const res = await fetch(`http://localhost:8000/proclaim`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ species, side }),
       });
       const data = await res.json();
 
@@ -62,20 +60,7 @@ export default function AuguryApp() {
         </h1>
         {/* •–– input nested at top ––• */}
         <div className="flex space-x-2">
-          <input
-            type="text"
-            placeholder="Species (e.g., corvus corax)"
-            value={species}
-            onChange={(e) => setSpecies(e.target.value)}
-            className="flex-1 px-3 py-2 rounded bg-gray-800 text-white placeholder-gray-400"
-          />
-          <input
-            type="text"
-            placeholder="Side (dexter/sinister)"
-            value={side}
-            onChange={(e) => setSide(e.target.value)}
-            className="flex-1 px-3 py-2 rounded bg-gray-800 text-white placeholder-gray-400"
-          />
+
           <button
             onClick={handleSubmit}
             disabled={loading}
