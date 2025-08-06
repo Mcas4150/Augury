@@ -18,7 +18,7 @@ export default function AuguryApp() {
     setJudgement(null);
 
     try {
-      const res = await fetch(`http://localhost:8000/proclaim/audio`, {
+      const res = await fetch(`http://localhost:8000/proclaim`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ species, side }),
