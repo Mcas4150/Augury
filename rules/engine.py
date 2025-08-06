@@ -2,9 +2,9 @@
 import pathlib
 import yaml
 
-_rules = yaml.safe_load(
-    open(pathlib.Path(__file__).parent.parent / "augury_rules.yaml")
-)
+RULES_FILE = pathlib.Path(__file__).parent.parent / "augury_rules.yaml"
+with RULES_FILE.open("r", encoding="utf-8") as f:        # ← key fix
+    _rules = yaml.safe_load(f)
 
 def evaluate_omen(fact: dict) -> dict:
     # 1) pull raw inputs

@@ -28,7 +28,7 @@ def build_llm():
         return Llama(
             model_path=str(MODEL),
             n_ctx=2048,
-            n_gpu_layers=35,
+            n_gpu_layers=0,
             verbose=False                    # hide perf prints
         )
 
@@ -47,7 +47,10 @@ SYSTEM = (
     "• Then, under 'OMEN:', proclaim the verdict in ≤120 words, ending with '<END>'."
 )
 TEMPLATE = "FACTS:\n{facts}\nTHINK:\n"
-rules = yaml.safe_load(open("augury_rules.yaml"))
+
+RULES_PATH = pathlib.Path(__file__).parent / "augury_rules.yaml"
+with RULES_PATH.open("r", encoding="utf-8") as f:
+    rules = yaml.safe_load(f)
 
 # ── Main omen function (used by CLI & API)
 def omen(data: dict) -> str:
