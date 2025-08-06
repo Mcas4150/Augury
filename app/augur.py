@@ -1,11 +1,11 @@
+# ── app/augur.py ───────────────────────────────────────────────────────
 import os, sys, json, pathlib, contextlib, yaml
 from llama_cpp import Llama, llama_log_set
-from rules.engine import evaluate_omen
+from .rules.engine import evaluate_omen          # ← relative import
 
-# ── Silence the standard llama.cpp logger
+# silence llama.cpp logs
 llama_log_set(None, None)
 
-# ── Mute native Metal / ggml prints
 @contextlib.contextmanager
 def mute_native():
     with open(os.devnull, "w") as devnull:
@@ -18,18 +18,16 @@ def mute_native():
             os.dup2(old_out, 1)
             os.dup2(old_err, 2)
 
-# ── Model path
 MODEL = pathlib.Path("models/llama3-8B-q4_k_m.gguf").expanduser()
 
-# ── Lazy-loaded global model
 _llm = None
 def build_llm():
-    with mute_native():                      # hide Metal init spam
+    with mute_native():
         return Llama(
             model_path=str(MODEL),
             n_ctx=2048,
-            n_gpu_layers=0,
-            verbose=False                    # hide perf prints
+            n_gpu_layers=0,           # CPU-only wheel on Windows
+            verbose=False
         )
 
 def get_llm():
@@ -38,7 +36,6 @@ def get_llm():
         _llm = build_llm()
     return _llm
 
-# ── Prompt scaffold
 SYSTEM = (
     "You are the Pontifex Augur of Rome. "
     "Speak in elevated, archaic English with Latin flourishes. "
@@ -52,13 +49,12 @@ RULES_PATH = pathlib.Path(__file__).parent / "augury_rules.yaml"
 with RULES_PATH.open("r", encoding="utf-8") as f:
     rules = yaml.safe_load(f)
 
-# ── Main omen function (used by CLI & API)
 def omen(data: dict) -> str:
     facts = data.copy()
-    facts.update(evaluate_omen(facts))      # add omen + logic
+    facts.update(evaluate_omen(facts))
     prompt = f"{SYSTEM}\n{TEMPLATE.format(facts=json.dumps(facts, indent=2))}"
 
-    with mute_native():                     # hide perf prints per call
+    with mute_native():
         text = get_llm()(
             prompt,
             max_tokens=200,
@@ -70,6 +66,5 @@ def omen(data: dict) -> str:
 
     return text.strip().removesuffix("<END>").strip()
 
-# ── CLI entry-point
 if __name__ == "__main__":
     print(omen(json.loads(sys.stdin.read())))
