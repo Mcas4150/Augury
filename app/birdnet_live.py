@@ -42,6 +42,7 @@ async def run_birdnet():
                         species = d["common_name"]
                         conf    = round(d["confidence"], 3)
                         osc.send_message("/birdnet/detect", [species, conf])
+                        settings.LATEST_SPECIES = species
                         # stash to a global asyncio.Queue for the augur route if needed
                         await settings.DETECTION_Q.put({"species": species, "conf": conf})
                 await asyncio.sleep(0)   # yield

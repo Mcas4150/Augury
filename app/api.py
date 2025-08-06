@@ -1,9 +1,10 @@
 # ── app/api.py ─────────────────────────────────────────────────────────
-import os, uuid, base64, subprocess, tempfile, platform
+import random, os, uuid, base64, subprocess, tempfile, platform
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Body
 from pydantic import BaseModel
+from .settings import settings
 import edge_tts
 
 from .augur import omen, get_llm
@@ -12,9 +13,7 @@ from .rules.engine import evaluate_omen     # ← relative import
 router = APIRouter()                         # router, not FastAPI
 
 # ── Schemas ────────────────────────────────────────────────────────────
-class OmenRequest(BaseModel):
-    species: str
-    side: str
+
 
 class OmenResponse(BaseModel):
     proclamation: str
@@ -27,19 +26,24 @@ class AudioResponse(BaseModel):
 
 # ── Text-only endpoint ────────────────────────────────────────────────
 @router.post("/proclaim", response_model=OmenResponse)
-def proclaim(req: OmenRequest):
+def proclaim(_: dict | None = Body(None)):
     try:
         get_llm()
-        facts      = req.dict()
+        if settings.LATEST_SPECIES is None:
+            raise HTTPException(503, "No bird detected yet")
+
+        side  = random.choice(["dexter", "sinister"])
+        facts = {"species": settings.LATEST_SPECIES, "side": side}
         judgement  = evaluate_omen(facts)["omen"]
         text       = omen(facts)
+
         return {"proclamation": text, "judgement": judgement}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
 # ── Audio + text endpoint ─────────────────────────────────────────────
 @router.post("/proclaim/audio", response_model=AudioResponse)
-async def proclaim_audio(req: OmenRequest):
+async def proclaim_audio():
     try:
         get_llm()
         facts      = req.dict()
