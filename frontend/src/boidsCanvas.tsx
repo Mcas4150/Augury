@@ -24,17 +24,39 @@ export default function BoidsCanvas({
   // we’ll keep our boids and loop handle in refs so they survive re-renders
   const boidsRef = useRef<Boid[]>([]);
   const rafRef = useRef<number>(0);
+  const birdImageRef = useRef<HTMLImageElement | null>(null);
 
   // a ref to hold the latest consulting flag inside our animation loop
   const consultingRef = useRef(isConsulting);
   consultingRef.current = isConsulting;
 
+  const loadBirdImage = () => {
+    const birdImage = new Image();
+    // Add a cache-busting query parameter
+    birdImage.src = `/comfyui/Bird1.png?t=${new Date().getTime()}`;
+    birdImage.onload = () => {
+      birdImageRef.current = birdImage;
+    };
+  };
+
   useEffect(() => {
+    loadBirdImage();
+
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext("2d")!;
     const parent = canvas.parentElement!;
-    const W = (canvas.width = parent.clientWidth);
-    const H = (canvas.height = parent.clientHeight);
+    
+    let W: number, H: number;
+
+    const resizeCanvas = () => {
+      W = canvas.width = parent.clientWidth;
+      H = canvas.height = parent.clientHeight;
+    };
+
+    const resizeObserver = new ResizeObserver(() => resizeCanvas());
+    resizeObserver.observe(parent);
+    
+    resizeCanvas(); // Initial size
 
     // initialize boids only once
     const boids: Boid[] = Array.from({ length: 50 }, () => ({
@@ -52,10 +74,6 @@ export default function BoidsCanvas({
     function updateBoids() {
       const isConsult = consultingRef.current;
       const speedMultiplier = isConsult ? 3 : 1; // double speed when consulting
-      const color = isConsult ? "#88ddff" : "#ffffff"; // red when consulting
-
-      // store for draw
-      (ctx as any)._boidColor = color;
 
       boids.forEach((b) => {
         let align = { x: 0, y: 0 },
@@ -131,6 +149,7 @@ export default function BoidsCanvas({
 
     function drawBoids() {
       ctx.clearRect(0, 0, W, H);
+      const birdImg = birdImageRef.current;
 
       // if consulting, enable glow
       if (consultingRef.current) {
@@ -140,11 +159,33 @@ export default function BoidsCanvas({
         ctx.shadowBlur = 0;
       }
 
-      ctx.fillStyle = (ctx as any)._boidColor || "#fff";
+      if (!birdImg) {
+        // Fallback to circles if image is not loaded
+        ctx.fillStyle = "#fff";
+        for (let b of boidsRef.current) {
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.shadowBlur = 0;
+        return;
+      }
+
       for (let b of boidsRef.current) {
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, 1.5, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        // rotate to face direction of movement
+        ctx.rotate(Math.atan2(b.vy, b.vx));
+        const birdWidth = 100;
+        const birdHeight = 100;
+        ctx.drawImage(
+          birdImg,
+          -birdWidth / 2,
+          -birdHeight / 2,
+          birdWidth,
+          birdHeight
+        );
+        ctx.restore();
       }
       ctx.shadowBlur = 0;
     }
@@ -157,11 +198,18 @@ export default function BoidsCanvas({
     }
     loop();
 
-    return () => cancelAnimationFrame(rafRef.current);
+    return () => {
+      resizeObserver.disconnect();
+      cancelAnimationFrame(rafRef.current);
+    };
   }, []); // <-- only run on mount
 
   // if you ever want to “jolt” things on `trigger`, you can react to it here:
   useEffect(() => {
+    if (!trigger) return;
+    // reload the bird image to get the latest version
+    loadBirdImage();
+
     // e.g. reset velocities randomly
     boidsRef.current.forEach((b) => {
       b.vx = (Math.random() - 0.5) * 2;
