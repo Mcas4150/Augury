@@ -32,9 +32,6 @@ export default function AuguryApp() {
       setProclamation(data.proclamation);
       setJudgement(data.judgement);
       setBoidTrigger(Date.now());
-
-      const audio = new Audio(`data:audio/mpeg;base64,${data.audio_base64}`);
-      audio.play();
     } catch {
       setProclamation("⚠️ Error invoking the augur. Check server connection.");
     } finally {
@@ -43,50 +40,37 @@ export default function AuguryApp() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white md:flex">
-      {/* left panel */}
-      <div className="md:w-1/2 flex flex-col items-center p-6 space-y-6">
-        <div className="relative w-full h-[384px]">
-          <BoidsCanvas trigger={boidTrigger} isConsulting={loading} />
-        </div>
-        <div className="relative w-full h-[384px]">
-          <Image
-            src="/media/augury2.png"
-            alt="Augur"
-            fill
-            style={{ objectFit: "contain" }}
-          />
-        </div>
+    <div className="relative min-h-screen bg-black text-white flex flex-col">
+      {/* Boids canvas takes up top half */}
+      <div className="relative w-full h-[50vh]">
+        <BoidsCanvas trigger={boidTrigger} isConsulting={loading} />
       </div>
 
-      {/* right panel */}
-      <div className="md:w-1/2 flex flex-col justify-start p-6 space-y-6">
-        <h1 className="text-4xl font-roman font-bold tracking-widest">
-          Consult the Augur
-        </h1>
-        {/* •–– input nested at top ––• */}
-        <div className="flex space-x-2">
-
+      {/* Content centered in the bottom half */}
+      <div className="flex-grow flex flex-col items-center justify-center p-6 space-y-6">
+        <div className="flex flex-col items-center space-y-4 w-full max-w-2xl">
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="px-4 py-2 rounded bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50"
+            className="px-6 py-3 rounded-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-lg font-bold"
           >
             {loading ? "Invoking..." : "Consult Augur"}
           </button>
+
+          {judgement && (
+            <div className="text-2xl font-roman">
+              Judgement: <strong>{judgement}</strong>
+            </div>
+          )}
+
+          {proclamation && (
+            <div className="bg-gray-900 bg-opacity-75 text-white p-6 rounded-lg shadow-lg overflow-auto w-full text-center">
+              <div className="whitespace-pre-wrap font-mono">
+                {proclamation}
+              </div>
+            </div>
+          )}
         </div>
-
-        {judgement && (
-          <div className="text-xl">
-            Judgement: <strong>{judgement}</strong>
-          </div>
-        )}
-
-        {proclamation && (
-          <div className="bg-white text-black p-6 rounded-lg shadow-lg overflow-auto">
-            <div className="whitespace-pre-wrap font-roman">{proclamation}</div>
-          </div>
-        )}
       </div>
     </div>
   );
