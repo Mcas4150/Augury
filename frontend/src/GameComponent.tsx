@@ -1,41 +1,35 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 
-const GameComponent = ({ width, height }) => {
+const GameComponent = () => {
   const canvasRef = useRef(null);
+  const [isGameWon, setIsGameWon] = useState(false);
+  const [textProps, setTextProps] = useState({ x: 0, y: 0, fontSize: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    canvas.width = width;
-    canvas.height = height;
-
-    const PIXEL_RESOLUTION_X = 480;
-    const PIXEL_RESOLUTION_Y = 270;
-    const buffer = document.createElement('canvas');
-    buffer.width = PIXEL_RESOLUTION_X;
-    buffer.height = PIXEL_RESOLUTION_Y;
-    const bufferCtx = buffer.getContext('2d');
+    if (!ctx) return;
     
-    const NODE_RADIUS = 8;
-    const MAX_LINKS_PER_NODE = 4;
-    const PRESSURE_INCREASE_RATE = 0.5;
-    const LINK_BALANCE_FACTOR = 0.01;
-    const MOVEMENT_SPEED = 0.2;
-    const SEPARATION_DISTANCE = 40;
-    const SEPARATION_FORCE = 0.01;
-    const EDGE_MARGIN = 50;
-    const EDGE_TURN_FORCE = 0.05;
+    let animationFrameId;
     let nodes = [];
     let links = [];
     let nextNodeId = 0;
     let isDrawingLink = false;
     let startNode = null;
     let mouse = { x: 0, y: 0 };
+    const NODE_RADIUS = 16;
+    const MOVEMENT_SPEED = 0.2;
+    const SEPARATION_DISTANCE = 80;
+    const SEPARATION_FORCE = 0.01;
+    const EDGE_MARGIN = 50;
+    const EDGE_TURN_FORCE = 0.05;
     const connectSounds = [new Audio('/media/GONG 1.wav'), new Audio('/media/GONG 2.wav')];
     let nextSoundIndex = 0;
-    
+
     function createDitherPattern(density) {
         const patternCanvas = document.createElement('canvas');
         patternCanvas.width = 4;
@@ -53,97 +47,241 @@ const GameComponent = ({ width, height }) => {
                 }
             }
         }
-        return bufferCtx.createPattern(patternCanvas, 'repeat');
+        return ctx.createPattern(patternCanvas, 'repeat');
     }
-
     const ditherPatterns = [createDitherPattern(0.25), createDitherPattern(0.50), createDitherPattern(0.75), createDitherPattern(1.00)];
-    
+
+    const resizeCanvas = () => {
+      const container = canvas.parentElement;
+      if (container) {
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        return true;
+      }
+      return false;
+    };
+
     class Node {
-        constructor(x, y) {
-            this.id = nextNodeId++; this.x = x; this.y = y; this.radius = NODE_RADIUS; this.pressure = 0; this.isInverted = false; this.linkCount = 0; this.vx = (Math.random() - 0.5) * MOVEMENT_SPEED; this.vy = (Math.random() - 0.5) * MOVEMENT_SPEED;
-        }
-        draw() {
-            if (this.isInverted) { bufferCtx.fillStyle = ditherPatterns[1]; } else if (this.pressure > 75) { bufferCtx.fillStyle = ditherPatterns[3]; } else if (this.pressure > 50) { bufferCtx.fillStyle = ditherPatterns[2]; } else if (this.pressure > 25) { bufferCtx.fillStyle = ditherPatterns[1]; } else { bufferCtx.fillStyle = ditherPatterns[0]; }
-            bufferCtx.beginPath(); bufferCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); bufferCtx.fill(); bufferCtx.strokeStyle = '#FFFFFF'; bufferCtx.stroke();
-        }
+      constructor(x, y) {
+        this.id = nextNodeId++; this.x = x; this.y = y; this.radius = NODE_RADIUS; this.linkCount = 0; this.vx = (Math.random() - 0.5) * MOVEMENT_SPEED; this.vy = (Math.random() - 0.5) * MOVEMENT_SPEED;
+      }
+      draw() {
+        ctx.fillStyle = ditherPatterns[2]; 
+        ctx.beginPath(); 
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); 
+        ctx.fill();
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.stroke();
+      }
     }
 
-    let animationFrameId;
-    function gameLoop(currentTime) {
-        bufferCtx.fillStyle = '#000000'; bufferCtx.fillRect(0, 0, buffer.width, buffer.height);
-        updatePressure(); updateNodePositions(); drawLinks(); drawNodes();
-        ctx.imageSmoothingEnabled = false; ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.drawImage(buffer, 0, 0, canvas.width, canvas.height);
-        animationFrameId = requestAnimationFrame(gameLoop);
+    function spawnNode() {
+        if (nodes.length >= 4) return;
+        const quadrantWidth = canvas.width / 2;
+        const quadrantHeight = canvas.height / 2;
+        const padding = 50;
+        let x, y;
+        switch (nodes.length) {
+            case 0: x = Math.random()*(quadrantWidth-padding*2)+padding; y = Math.random()*(quadrantHeight-padding*2)+padding; break;
+            case 1: x = quadrantWidth + Math.random()*(quadrantWidth-padding*2); y = Math.random()*(quadrantHeight-padding*2)+padding; break;
+            case 2: x = quadrantWidth + Math.random()*(quadrantWidth-padding*2); y = quadrantHeight + Math.random()*(quadrantHeight-padding*2); break;
+            case 3: x = Math.random()*(quadrantWidth-padding*2)+padding; y = quadrantHeight + Math.random()*(quadrantHeight-padding*2); break;
+        }
+        nodes.push(new Node(x, y));
     }
     
-    function updatePressure(){
-        nodes.forEach(node=>{if(!node.isInverted){node.pressure+=PRESSURE_INCREASE_RATE/60;if(node.pressure>=100){node.pressure=100;node.isInverted=true;}}});
-        links.forEach(link=>{const nodeA=link.nodeA;const nodeB=link.nodeB;const pressureDifference=nodeA.pressure-nodeB.pressure;const amountToTransfer=pressureDifference*LINK_BALANCE_FACTOR;nodeA.pressure-=amountToTransfer;nodeB.pressure+=amountToTransfer;if(nodeA.isInverted&&!nodeB.isInverted)nodeB.pressure-=0.1;if(nodeB.isInverted&&!nodeA.isInverted)nodeA.pressure-=0.1;
-        nodes.forEach(n=>{if(n.pressure<0)n.pressure=0;if(n.pressure>100)n.pressure=100;});});
-    }
-    
-    function updateNodePositions(){
-        nodes.forEach(node=>{let force={x:0,y:0};nodes.forEach(otherNode=>{if(node===otherNode)return;const dx=otherNode.x-node.x;const dy=otherNode.y-node.y;const distance=Math.sqrt(dx*dx+dy*dy);if(distance<SEPARATION_DISTANCE){force.x-=dx/distance*SEPARATION_FORCE;force.y-=dy/distance*SEPARATION_FORCE;}});
-        if(node.x<EDGE_MARGIN)force.x+=EDGE_TURN_FORCE;if(node.x>buffer.width-EDGE_MARGIN)force.x-=EDGE_TURN_FORCE;if(node.y<EDGE_MARGIN)force.y+=EDGE_TURN_FORCE;if(node.y>buffer.height-EDGE_MARGIN)force.y-=EDGE_TURN_FORCE;
-        node.vx+=force.x;node.vy+=force.y;const speed=Math.sqrt(node.vx*node.vx+node.vy*node.vy);if(speed>MOVEMENT_SPEED){node.vx=(node.vx/speed)*MOVEMENT_SPEED;node.vy=(node.vy/speed)*MOVEMENT_SPEED;}
-        node.x+=node.vx;node.y+=node.vy;});
+    function linesIntersect(p1, q1, p2, q2) {
+        function onSegment(p, q, r) { return q.x<=Math.max(p.x,r.x)&&q.x>=Math.min(p.x,r.x)&&q.y<=Math.max(p.y,r.y)&&q.y>=Math.min(p.y,r.y); }
+        function orientation(p, q, r) { const val = (q.y-p.y)*(r.x-q.x)-(q.x-p.x)*(r.y-q.y); if (val === 0) return 0; return (val > 0) ? 1 : 2; }
+        const o1 = orientation(p1, q1, p2); const o2 = orientation(p1, q1, q2); const o3 = orientation(p2, q2, p1); const o4 = orientation(p2, q2, q1);
+        if (o1!==o2&&o3!==o4) { if ((p1.x===p2.x&&p1.y===p2.y)||(p1.x===q2.x&&p1.y===q2.y)||(q1.x===p2.x&&q1.y===p2.y)||(q1.x===q2.x&&q1.y===q2.y)) return false; return true; }
+        return false;
     }
 
-    function drawLinks() {
-        bufferCtx.strokeStyle = '#FFFFFF'; bufferCtx.lineWidth = 1;
-        links.forEach(link => { bufferCtx.beginPath(); bufferCtx.moveTo(link.nodeA.x, link.nodeA.y); bufferCtx.lineTo(link.nodeB.x, link.nodeB.y); bufferCtx.stroke(); });
-        if (isDrawingLink && startNode) {
-            const canvasRect = canvas.getBoundingClientRect();
-            const relativeX = mouse.x - canvasRect.left;
-            const relativeY = mouse.y - canvasRect.top;
-            const bufferMouseX = relativeX * (buffer.width / canvas.width);
-            const bufferMouseY = relativeY * (buffer.height / canvas.height);
-            bufferCtx.strokeStyle = '#FFFFFF'; bufferCtx.lineWidth = 1; bufferCtx.beginPath(); bufferCtx.moveTo(startNode.x, startNode.y); bufferCtx.lineTo(bufferMouseX, bufferMouseY); bufferCtx.stroke();
-        }
-    }
-    
-    function drawNodes() { nodes.forEach(node => node.draw()); }
-    
-    function spawnNode() { const margin = 20; const x = Math.random() * (buffer.width - margin * 2) + margin; const y = Math.random() * (buffer.height - margin * 2) + margin; nodes.push(new Node(x, y)); }
-    
-    // --- THIS FUNCTION IS THE FIX ---
     function getNodeAt(screenX, screenY) {
-        const canvasRect = canvas.getBoundingClientRect();
-        const relativeX = screenX - canvasRect.left;
-        const relativeY = screenY - canvasRect.top;
-        const bufferX = relativeX * (buffer.width / canvas.width);
-        const bufferY = relativeY * (buffer.height / canvas.height);
+        const rect = canvas.getBoundingClientRect();
+        const x = screenX - rect.left;
+        const y = screenY - rect.top;
         for (let i = nodes.length - 1; i >= 0; i--) {
             const node = nodes[i];
-            const distance = Math.sqrt((bufferX - node.x) ** 2 + (bufferY - node.y) ** 2);
-            if (distance < node.radius) { return node; }
+            const distance = Math.hypot(x - node.x, y - node.y);
+            if (distance < node.radius) return node;
         }
         return null;
     }
+    
+    function getFittingFontSize(text, nodes) {
+        let sumX = 0, sumY = 0;
+        let minX = Infinity, maxX = -Infinity;
+        nodes.forEach(node => {
+            sumX += node.x; sumY += node.y;
+            if (node.x < minX) minX = node.x;
+            if (node.x > maxX) maxX = node.x;
+        });
+        const centerX = sumX / nodes.length;
+        const centerY = sumY / nodes.length;
+        const availableWidth = (maxX - minX) * 0.8;
+        let fontSize = 50;
+        ctx.font = `bold ${fontSize}px "Cinzel"`;
+        while (ctx.measureText(text).width > availableWidth && fontSize > 8) {
+            fontSize--;
+            ctx.font = `bold ${fontSize}px "Cinzel"`;
+        }
+        return { centerX, centerY, fontSize };
+    }
+    
+    function updateNodePositions(){
+        nodes.forEach(node => {
+            let force = { x: 0, y: 0 };
+            nodes.forEach(otherNode => {
+                if (node === otherNode) return;
+                const dx = otherNode.x - node.x;
+                const dy = otherNode.y - node.y;
+                const distance = Math.hypot(dx, dy);
+                if (distance < SEPARATION_DISTANCE) {
+                    force.x -= dx / distance * SEPARATION_FORCE;
+                    force.y -= dy / distance * SEPARATION_FORCE;
+                }
+            });
+            if (node.x < EDGE_MARGIN) force.x += EDGE_TURN_FORCE;
+            if (node.x > canvas.width - EDGE_MARGIN) force.x -= EDGE_TURN_FORCE;
+            if (node.y < EDGE_MARGIN) force.y += EDGE_TURN_FORCE;
+            if (node.y > canvas.height - EDGE_MARGIN) force.y -= EDGE_TURN_FORCE;
+            node.vx += force.x;
+            node.vy += force.y;
+            const speed = Math.hypot(node.vx, node.vy);
+            if (speed > MOVEMENT_SPEED) {
+                node.vx = (node.vx / speed) * MOVEMENT_SPEED;
+                node.vy = (node.vy / speed) * MOVEMENT_SPEED;
+            }
+            node.x += node.vx;
+            node.y += node.vy;
+        });
+    }
 
-    const mousedownHandler = (e) => { const clickedNode = getNodeAt(e.clientX, e.clientY); if (clickedNode && clickedNode.linkCount < MAX_LINKS_PER_NODE) { isDrawingLink = true; startNode = clickedNode; } };
+    function drawLinks() {
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 2;
+        links.forEach(link => {
+            ctx.beginPath();
+            ctx.moveTo(link.nodeA.x, link.nodeA.y);
+            ctx.lineTo(link.nodeB.x, link.nodeB.y);
+            ctx.stroke();
+        });
+        if (isDrawingLink && startNode) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = mouse.x - rect.left;
+            const mouseY = mouse.y - rect.top;
+            ctx.beginPath();
+            ctx.moveTo(startNode.x, startNode.y);
+            ctx.lineTo(mouseX, mouseY);
+            ctx.stroke();
+        }
+    }
+
+    function drawNodes() {
+        nodes.forEach(node => node.draw());
+    }
+    
+    let localGameWon = false;
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!localGameWon) updateNodePositions();
+
+      if (localGameWon) {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+        ctx.beginPath();
+        const orderedNodes = nodes.sort((a, b) => a.id - b.id);
+        ctx.moveTo(orderedNodes[0].x, orderedNodes[0].y);
+        for (let i = 1; i < orderedNodes.length; i++) ctx.lineTo(orderedNodes[i].x, orderedNodes[i].y);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      drawLinks(); 
+      drawNodes();
+      animationFrameId = requestAnimationFrame(gameLoop);
+    }
+    
+    const mousedownHandler = (e) => { const clickedNode = getNodeAt(e.clientX, e.clientY); if (clickedNode) { isDrawingLink = true; startNode = clickedNode; } };
     const mousemoveHandler = (e) => { mouse.x = e.clientX; mouse.y = e.clientY; };
+    
     const mouseupHandler = (e) => {
-        if (isDrawingLink && startNode) { const endNode = getNodeAt(e.clientX, e.clientY); if (endNode && startNode.id !== endNode.id && endNode.linkCount < MAX_LINKS_PER_NODE) { const alreadyExists = links.some(link => (link.nodeA.id === startNode.id && link.nodeB.id === endNode.id) || (link.nodeA.id === endNode.id && link.nodeB.id === startNode.id)); if (!alreadyExists) { links.push({ nodeA: startNode, nodeB: endNode }); startNode.linkCount++; endNode.linkCount++; connectSounds[nextSoundIndex].play(); nextSoundIndex = (nextSoundIndex + 1) % connectSounds.length; spawnNode(); } } }
-        isDrawingLink = false; startNode = null;
+        if (isDrawingLink && startNode) {
+            const endNode = getNodeAt(e.clientX, e.clientY);
+            if (endNode && startNode.id !== endNode.id) {
+                const alreadyExists = links.some(link => (link.nodeA.id === startNode.id && link.nodeB.id === endNode.id) || (link.nodeA.id === endNode.id && link.nodeB.id === startNode.id));
+                const canConnect = startNode.linkCount < 2 && endNode.linkCount < 2;
+                let isCrossing = false;
+                for (const link of links) {
+                    if (linesIntersect(startNode, endNode, link.nodeA, link.nodeB)) {
+                        isCrossing = true;
+                        break;
+                    }
+                }
+                if (!alreadyExists && canConnect && !isCrossing) {
+                    links.push({ nodeA: startNode, nodeB: endNode });
+                    startNode.linkCount++;
+                    endNode.linkCount++;
+                    connectSounds[nextSoundIndex].play();
+                    nextSoundIndex = (nextSoundIndex + 1) % connectSounds.length;
+                    
+                    if (nodes.length < 4) {
+                        spawnNode();
+                    } else if (nodes.length === 4) {
+                        const allNodesConnected = nodes.every(node => node.linkCount >= 2);
+                        if (allNodesConnected) {
+                            localGameWon = true;
+                            setIsGameWon(true);
+                            const props = getFittingFontSize("Take The Auspices", nodes);
+                            setTextProps(props);
+                            nodes.forEach(node => { node.vx = 0; node.vy = 0; });
+                        }
+                    }
+                }
+            }
+        }
+        isDrawingLink = false;
+        startNode = null;
     };
 
-    canvas.addEventListener('mousedown', mousedownHandler);
-    window.addEventListener('mousemove', mousemoveHandler); // Listen on window for mousemove
-    window.addEventListener('mouseup', mouseupHandler);     // Listen on window for mouseup
-    
-    spawnNode(); spawnNode();
-    animationFrameId = requestAnimationFrame(gameLoop);
+    if (resizeCanvas()) {
+        spawnNode(); 
+        spawnNode(); 
+        gameLoop();
+        canvas.addEventListener('mousedown', mousedownHandler);
+        window.addEventListener('mousemove', mousemoveHandler);
+        window.addEventListener('mouseup', mouseupHandler);
+    }
     
     return () => {
+        cancelAnimationFrame(animationFrameId);
         canvas.removeEventListener('mousedown', mousedownHandler);
         window.removeEventListener('mousemove', mousemoveHandler);
         window.removeEventListener('mouseup', mouseupHandler);
-        cancelAnimationFrame(animationFrameId);
     };
-  }, [width, height]);
+  }, []);
 
-  return <canvas id="gameCanvas" ref={canvasRef} width={width} height={height}></canvas>;
+  return (
+    <div className="relative w-full h-full">
+      <canvas id="gameCanvas" ref={canvasRef} className="w-full h-full"></canvas>
+      {isGameWon && (
+        <Link
+          href="/augury"
+          className="absolute font-roman text-white hover:text-gray-300"
+          style={{
+            left: `${textProps.centerX}px`,
+            top: `${textProps.centerY}px`,
+            fontSize: `${textProps.fontSize}px`,
+            transform: 'translate(-50%, -50%)',
+            textAlign: 'center'
+          }}
+        >
+          Take The Auspices
+        </Link>
+      )}
+    </div>
+  );
 };
 
 export default GameComponent;
