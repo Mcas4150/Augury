@@ -1,9 +1,10 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link'; // Import the Link component
 import Modal from '@/Modal';
 import ScrollComponent from '@/ScrollComponent';
+import { useWebSocket } from '@/useWebSocket';
 
 // Statically import the images
 import boidsDiagram from '/public/media/boidsdiagram.gif';
@@ -66,6 +67,16 @@ const scrollContent = (
 
 export default function ShorePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+<<<<<<< HEAD
+=======
+  const { send } = useWebSocket();
+
+  useEffect(() => {
+    send("shore");
+  }, [send]);
+
+  const scrollText = `Waves crash upon the shore, echoing forgotten words.`;
+>>>>>>> 105fac5 (add sounds websocket provider)
 
   return (
     <>

@@ -1,53 +1,13 @@
+
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import BoidsCanvas from './boidsCanvas';
-import { useWebSocket } from './useWebSocket';
 
-const wsUrl = "ws://10.0.0.232:9987";
-
-const GameComponent = () => {
+const GameComponent = ({onGameWon}) => {
   const canvasRef = useRef(null);
   const [isGameWon, setIsGameWon] = useState(false);
   const [textProps, setTextProps] = useState({ x: 0, y: 0, fontSize: 0 });
-  
-  // Augury states
-  const [proclamation, setProclamation] = useState("");
-  const [judgement, setJudgement] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [boidTrigger, setBoidTrigger] = useState(0);
-  const [showBoids, setShowBoids] = useState(false);
-  
-  const { send } = useWebSocket(wsUrl);
-
-  const handleTakeAuspices = async () => {
-    console.log("Starting augury...");
-    send("divinate");
-    setLoading(true);
-    setProclamation("");
-    setJudgement(null);
-    setShowBoids(false);
-
-    try {
-      const res = await fetch(`http://localhost:8000/proclaim`, {
-        method: "POST",
-      });
-      const data = await res.json();
-      console.log("API response:", data);
-
-      setProclamation(data.proclamation);
-      setJudgement(data.judgement);
-      setBoidTrigger(Date.now());
-    } catch (error) {
-      console.error("API error:", error);
-      setProclamation("⚠️ Error invoking the augur. Check server connection.");
-    } finally {
-      console.log("Setting showBoids to true");
-      setShowBoids(true); // Always show boids after the request completes
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -277,6 +237,9 @@ const GameComponent = () => {
                             const props = getFittingFontSize("Take The Auspices", nodes);
                             setTextProps(props);
                             nodes.forEach(node => { node.vx = 0; node.vy = 0; });
+                                                        if (onGameWon) {
+                              onGameWon(props);
+                            }
                         }
                     }
                 }
@@ -306,65 +269,21 @@ const GameComponent = () => {
   return (
     <div className="relative w-full h-full">
       <canvas id="gameCanvas" ref={canvasRef} className="w-full h-full"></canvas>
-      
-      {/* Debug info - remove this later */}
-      <div className="absolute top-4 left-4 text-white text-xs bg-black bg-opacity-50 p-2 rounded">
-        showBoids: {showBoids.toString()}, loading: {loading.toString()}
-      </div>
-      
-      {isGameWon && !proclamation && !loading && (
-        <button
-          onClick={handleTakeAuspices}
-          disabled={loading}
-          className="absolute font-roman text-white hover:text-gray-300 cursor-pointer bg-transparent border-none p-0"
-          style={{
-            left: `${textProps.centerX}px`,
-            top: `${textProps.centerY}px`,
-            fontSize: `${textProps.fontSize}px`,
-            transform: 'translate(-50%, -50%)',
-            textAlign: 'center'
-          }}
-        >
-          {loading ? "Invoking..." : "Take The Auspices"}
-        </button>
-      )}
-      
-      {/* Results overlay */}
-      {(judgement || proclamation) && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 space-y-6 bg-black bg-opacity-75">
-          {judgement && (
-            <div className="text-2xl font-roman text-white text-center">
-              Judgement: <strong>{judgement}</strong>
-            </div>
-          )}
+      {/* {isGameWon && (
+        // <div
           
-          {proclamation && (
-            <div className="bg-gray-900 bg-opacity-90 text-white p-6 rounded-lg shadow-lg overflow-auto max-w-4xl max-h-96 text-center">
-              <div className="whitespace-pre-wrap font-mono">
-                {proclamation}
-              </div>
-            </div>
-          )}
-          
-          <button
-            onClick={() => {
-              setProclamation("");
-              setJudgement(null);
-              setShowBoids(false);
-            }}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg"
-          >
-            Close
-          </button>
-        </div>
-      )}
-
-      {/* Boids overlay - visible when showBoids is true, positioned on top */}
-      {showBoids && (
-        <div className="absolute inset-0 w-full h-full pointer-events-none z-50">
-          <BoidsCanvas trigger={boidTrigger} isConsulting={loading} />
-        </div>
-      )}
+        //   className="absolute font-roman text-white hover:text-gray-300"
+        //   style={{
+        //     left: `${textProps.centerX}px`,
+        //     top: `${textProps.centerY}px`,
+        //     fontSize: `${textProps.fontSize}px`,
+        //     transform: 'translate(-50%, -50%)',
+        //     textAlign: 'center'
+        //   }}
+        // >
+        //   Take The Auspices
+        // </div>
+      )} */}
     </div>
   );
 };

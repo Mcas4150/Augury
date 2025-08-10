@@ -1,9 +1,10 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Modal from '@/Modal';
 import ScrollComponent from '@/ScrollComponent';
+import { useWebSocket } from '@/useWebSocket';
 
 // Statically import the images
 import labyrinthosDiagram from '/public/media/labyrinthos.jpg';
@@ -66,6 +67,16 @@ const scrollContent = (
 
 export default function HillPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+<<<<<<< HEAD
+=======
+  const { send } = useWebSocket();
+
+  useEffect(() => {
+    send("hill");
+  }, [send]);
+
+  const scrollText = `From this vantage point, the shape of the world seems clear.`;
+>>>>>>> 105fac5 (add sounds websocket provider)
 
   return (
     <>

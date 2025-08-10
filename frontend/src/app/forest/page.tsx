@@ -1,12 +1,18 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link'; // Import Link
 import Modal from '@/Modal';
 import ScrollComponent from '@/ScrollComponent';
+import { useWebSocket } from '@/useWebSocket';
 
 export default function ForestPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { send } = useWebSocket();
+
+  useEffect(() => {
+    send("forest");
+  }, [send]);
 
   const scrollContent = (
     <div>

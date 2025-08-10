@@ -1,26 +1,13 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useContext } from 'react';
+import { WebSocketContext } from './contexts/WebSocketContext';
+import type { WebSocketContextType } from './contexts/WebSocketContext';
 
-export function useWebSocket(url: string) {
-  const ws = useRef<WebSocket | null>(null);
-
-  useEffect(() => {
-    ws.current = new WebSocket(url);
-
-    ws.current.onopen    = () => console.log('WS connected');
-    ws.current.onmessage = (e) => console.log('WS message:', e.data);
-    ws.current.onclose   = () => console.log('WS closed');
-    ws.current.onerror   = (e) => console.error('WS error', e);
-
-    return () => ws.current?.close();
-  }, [url]);
-
-  const send = (data: string) => {
-    if (ws.current?.readyState === WebSocket.OPEN) {
-      ws.current.send(data);
+export const useWebSocket = (): WebSocketContextType => {
+    const context = useContext(WebSocketContext);
+    if (!context) {
+        throw new Error('useWebSocket must be used within a WebSocketProvider');
     }
-  };
-
-  return { send };
-}
+    return context;
+};
