@@ -31,11 +31,9 @@ export default function RootLayout({
   <Link href="/shore" style={{ marginRight: '20px', fontSize: '18px' }}>Shore</Link>
   <Link href="/hill" style={{ marginRight: '20px', fontSize: '18px' }}>Hill</Link>
   <Link href="/augury" style={{ marginRight: '20px', fontSize: '18px' }}>Augury</Link>
-  <Link href="/swarmscape" style={{ marginRight: '20px', fontSize: '18px' }}>Swarmscape</Link>
   <Link href="/game" style={{ marginRight: '20px', fontSize: '18px' }}>Game</Link>
   <Link href="/game2" style={{ marginRight: '20px', fontSize: '18px' }}>Game 2</Link>
   <Link href="/game3" style={{ marginRight: '20px', fontSize: '18px' }}>Game 3</Link>
-  <Link href="/relevance" style={{ marginRight: '20px', fontSize: '18px' }}>Relevance</Link>
   <Link href="/context" style={{ marginRight: '20px', fontSize: '18px' }}>Context</Link>
   <Link href="/docs" style={{ fontSize: '18px' }}>Documentation</Link>
 </nav>

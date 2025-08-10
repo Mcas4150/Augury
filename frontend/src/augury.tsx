@@ -3,9 +3,6 @@
 import Image from "next/image";
 import BoidsCanvas from "./boidsCanvas";
 import { useState } from "react";
-import { useWebSocket } from "./useWebSocket";
-
-const wsUrl = "ws://10.0.0.232:9987"; // To
 
 export default function AuguryApp() {
   const [species, setSpecies] = useState("");
@@ -15,10 +12,7 @@ export default function AuguryApp() {
   const [loading, setLoading] = useState(false);
   const [boidTrigger, setBoidTrigger] = useState(0);
 
-  const { send } = useWebSocket(wsUrl);
-
   const handleSubmit = async () => {
-    send("divinate");
     setLoading(true);
     setProclamation("");
     setJudgement(null);
@@ -26,12 +20,17 @@ export default function AuguryApp() {
     try {
       const res = await fetch(`http://localhost:8000/proclaim`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ species, side }),
       });
       const data = await res.json();
 
       setProclamation(data.proclamation);
       setJudgement(data.judgement);
       setBoidTrigger(Date.now());
+
+      const audio = new Audio(`data:audio/mpeg;base64,${data.audio_base64}`);
+      audio.play();
     } catch {
       setProclamation("⚠️ Error invoking the augur. Check server connection.");
     } finally {
@@ -40,37 +39,63 @@ export default function AuguryApp() {
   };
 
   return (
-    <div className="relative min-h-screen bg-black text-white flex flex-col">
-      {/* Boids canvas takes up top half */}
-      <div className="relative w-full h-[50vh]">
-        <BoidsCanvas trigger={boidTrigger} isConsulting={loading} />
+    <div className="min-h-screen bg-black text-white md:flex">
+      {/* left panel */}
+      <div className="md:w-1/2 flex flex-col items-center p-6 space-y-6">
+        <div className="relative w-full h-[384px]">
+          <BoidsCanvas trigger={boidTrigger} isConsulting={loading} />
+        </div>
+        <div className="relative w-full h-[384px]">
+          <Image
+            src="/media/augury2.png"
+            alt="Augur"
+            fill
+            style={{ objectFit: "contain" }}
+          />
+        </div>
       </div>
 
-      {/* Content centered in the bottom half */}
-      <div className="flex-grow flex flex-col items-center justify-center p-6 space-y-6">
-        <div className="flex flex-col items-center space-y-4 w-full max-w-2xl">
+      {/* right panel */}
+      <div className="md:w-1/2 flex flex-col justify-start p-6 space-y-6">
+        <h1 className="text-4xl font-roman font-bold tracking-widest">
+          Consult the Augur
+        </h1>
+        {/* •–– input nested at top ––• */}
+        <div className="flex space-x-2">
+          <input
+            type="text"
+            placeholder="Species (e.g., corvus corax)"
+            value={species}
+            onChange={(e) => setSpecies(e.target.value)}
+            className="flex-1 px-3 py-2 rounded bg-gray-800 text-white placeholder-gray-400"
+          />
+          <input
+            type="text"
+            placeholder="Side (dexter/sinister)"
+            value={side}
+            onChange={(e) => setSide(e.target.value)}
+            className="flex-1 px-3 py-2 rounded bg-gray-800 text-white placeholder-gray-400"
+          />
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="px-6 py-3 rounded-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-lg font-bold"
+            className="px-4 py-2 rounded bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50"
           >
             {loading ? "Invoking..." : "Consult Augur"}
           </button>
-
-          {judgement && (
-            <div className="text-2xl font-roman">
-              Judgement: <strong>{judgement}</strong>
-            </div>
-          )}
-
-          {proclamation && (
-            <div className="bg-gray-900 bg-opacity-75 text-white p-6 rounded-lg shadow-lg overflow-auto w-full text-center">
-              <div className="whitespace-pre-wrap font-mono">
-                {proclamation}
-              </div>
-            </div>
-          )}
         </div>
+
+        {judgement && (
+          <div className="text-xl">
+            Judgement: <strong>{judgement}</strong>
+          </div>
+        )}
+
+        {proclamation && (
+          <div className="bg-white text-black p-6 rounded-lg shadow-lg overflow-auto">
+            <div className="whitespace-pre-wrap font-roman">{proclamation}</div>
+          </div>
+        )}
       </div>
     </div>
   );
