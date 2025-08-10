@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useRef, useEffect } from "react";
@@ -11,7 +10,7 @@ interface Boid {
 }
 
 interface BoidsCanvasProps {
-  trigger?: number; // used to “jolt” the system if you ever want
+  trigger?: number; // used to "jolt" the system if you ever want
   isConsulting?: boolean; // when true, boids speed ↑ and color changes
 }
 
@@ -21,7 +20,7 @@ export default function BoidsCanvas({
 }: BoidsCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // we’ll keep our boids and loop handle in refs so they survive re-renders
+  // we'll keep our boids and loop handle in refs so they survive re-renders
   const boidsRef = useRef<Boid[]>([]);
   const rafRef = useRef<number>(0);
   const birdImageRef = useRef<HTMLImageElement | null>(null);
@@ -43,7 +42,7 @@ export default function BoidsCanvas({
     loadBirdImage();
 
     const canvas = canvasRef.current!;
-    const ctx = canvas.getContext("2d")!;
+    const ctx = canvas.getContext("2d", { alpha: true })!;
     const parent = canvas.parentElement!;
     
     let W: number, H: number;
@@ -57,6 +56,9 @@ export default function BoidsCanvas({
     resizeObserver.observe(parent);
     
     resizeCanvas(); // Initial size
+    
+    // Ensure canvas background is transparent
+    canvas.style.backgroundColor = 'transparent';
 
     // initialize boids only once
     const boids: Boid[] = Array.from({ length: 50 }, () => ({
@@ -73,7 +75,7 @@ export default function BoidsCanvas({
 
     function updateBoids() {
       const isConsult = consultingRef.current;
-      const speedMultiplier = isConsult ? 3 : 1; // double speed when consulting
+      const speedMultiplier = isConsult ? 3 : 1; // triple speed when consulting
 
       boids.forEach((b) => {
         let align = { x: 0, y: 0 },
@@ -116,30 +118,28 @@ export default function BoidsCanvas({
           b.vy = (b.vy / speed) * maxSpeed;
         }
 
-                if (isConsult) {
-                  // center of canvas
-                  const cx = W / 2;
-                  const cy = H / 2;
-                  // vector from center to boid
-                  const dx = b.x - cx;
-                  const dy = b.y - cy;
-                  const dist = Math.hypot(dx, dy) || 1;
-                  // perpendicular (–dy, dx) to create circular motion
-                  const perpX = -dy / dist;
-                  const perpY = dx / dist;
-                  // how strongly they spiral
-                  const spiralStrength = 1.5;
+        if (isConsult) {
+          // center of canvas
+          const cx = W / 2;
+          const cy = H / 2;
+          // vector from center to boid
+          const dx = b.x - cx;
+          const dy = b.y - cy;
+          const dist = Math.hypot(dx, dy) || 1;
+          // perpendicular (–dy, dx) to create circular motion
+          const perpX = -dy / dist;
+          const perpY = dx / dist;
+          // how strongly they spiral
+          const spiralStrength = 1.5;
 
-                  // **new** radial pull
-                  const pullStrength = 0.5; // tweak between 0 = no pull, up to ~1 for very tight pull
-                  const inwardX = -dx / dist;
-                  const inwardY = -dy / dist;
+          // **new** radial pull
+          const pullStrength = 0.5; // tweak between 0 = no pull, up to ~1 for very tight pull
+          const inwardX = -dx / dist;
+          const inwardY = -dy / dist;
 
-                  b.vx += perpX * spiralStrength + inwardX * pullStrength;
-                  b.vy += perpY * spiralStrength + inwardY * pullStrength;
-                  // b.vx += perpX * spiralStrength;
-                  // b.vy += perpY * spiralStrength;
-                }
+          b.vx += perpX * spiralStrength + inwardX * pullStrength;
+          b.vy += perpY * spiralStrength + inwardY * pullStrength;
+        }
 
         // move & wrap
         b.x = (b.x + b.vx + W) % W;
@@ -148,7 +148,12 @@ export default function BoidsCanvas({
     }
 
     function drawBoids() {
+      // Clear with transparent background
+      ctx.save();
+      ctx.globalCompositeOperation = 'source-over';
       ctx.clearRect(0, 0, W, H);
+      ctx.restore();
+      
       const birdImg = birdImageRef.current;
 
       // if consulting, enable glow
@@ -204,7 +209,7 @@ export default function BoidsCanvas({
     };
   }, []); // <-- only run on mount
 
-  // if you ever want to “jolt” things on `trigger`, you can react to it here:
+  // if you ever want to "jolt" things on `trigger`, you can react to it here:
   useEffect(() => {
     if (!trigger) return;
     // reload the bird image to get the latest version
@@ -217,5 +222,5 @@ export default function BoidsCanvas({
     });
   }, [trigger]);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />;
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full bg-transparent" />;
 }
