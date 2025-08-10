@@ -22,5 +22,8 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def _start_birdnet():
-    asyncio.create_task(run_birdnet())
-    log.info("BirdNET task started")
+    try:
+        asyncio.create_task(run_birdnet())
+        log.info("BirdNET background task started")
+    except Exception:
+        log.exception("Couldn't start BirdNET")

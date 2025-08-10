@@ -1,5 +1,7 @@
-import asyncio, sounddevice as sd
-from pydantic_settings import BaseSettings
+import asyncio
+import sounddevice as sd
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 HOSTAPIS = sd.query_hostapis()
 
@@ -16,21 +18,42 @@ def find_device(name_key: str, host_key: str | None = None) -> int:
     raise RuntimeError(f"No audio device matches name='{name_key}', host='{host_key}'")
 
 class Settings(BaseSettings):
-    # ── Audio capture
-    DEV: int   = find_device("In 1-2 (MOTU", host_key="WASAPI")
-    SR: int    = 48_000
+    # Audio capture — resolve at runtime, not import
+    DEV: int | None = None
+    SR: int = 48_000
     WIN_SEC: int = 3
     MIN_CONF: float = 0.30
 
-    # ── OSC target
-    TD_IP: str   = "127.0.0.1"
+    # Ollama
+    OLLAMA_URL: str = "http://127.0.0.1:11435"
+    OLLAMA_MODEL: str = "llama31-instruct-local"
+    NUM_CTX: int = 4096
+    NUM_BATCH: int = 512
+    NUM_PREDICT: int = 200
+    TEMP: float = 0.8
+
+    # OSC target
+    TD_IP: str = "127.0.0.1"
     TD_PORT: int = 7000
 
-    # ── Cross-task data
+    # Cross-task data
     DETECTION_Q: asyncio.Queue = asyncio.Queue()
-    LATEST_SPECIES: str | None = None        # ← declare it here
+    LATEST_SPECIES: str | None = None
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_prefix="AUGURY_",     # prevents collisions with PATH, TEMP, etc.
+        case_sensitive=False,
+    )
 
 settings = Settings()
+
+def resolve_input_device() -> int:
+    if settings.DEV is not None:
+        return settings.DEV
+    try:
+        return find_device("In 1-2 (MOTU", host_key="WASAPI")
+    except Exception:
+        return sd.default.device[0]
+
+settings.DEV = resolve_input_device()

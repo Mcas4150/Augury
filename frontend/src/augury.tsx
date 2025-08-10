@@ -29,8 +29,6 @@ export default function AuguryApp() {
       setJudgement(data.judgement);
       setBoidTrigger(Date.now());
 
-      const audio = new Audio(`data:audio/mpeg;base64,${data.audio_base64}`);
-      audio.play();
     } catch {
       setProclamation("⚠️ Error invoking the augur. Check server connection.");
     } finally {
@@ -85,7 +83,7 @@ export default function AuguryApp() {
           </button>
         </div>
 
-        {/* {judgement && (
+        {judgement && (
           <div className="text-xl">
             Judgement: <strong>{judgement}</strong>
           </div>
@@ -95,7 +93,7 @@ export default function AuguryApp() {
           <div className="bg-white text-black p-6 rounded-lg shadow-lg overflow-auto">
             <div className="whitespace-pre-wrap font-roman">{proclamation}</div>
           </div>
-        )} */}
+        )}
       </div>
     </div>
   );

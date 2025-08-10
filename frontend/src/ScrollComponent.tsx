@@ -16,13 +16,13 @@ const ScrollComponent = ({ children, continueLink = "/" }) => {
       />
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <div className="w-full max-w-lg h-3/5 p-4 overflow-y-auto">
-          <p className="font-roman text-lg text-gray-800 text-left whitespace-pre-wrap leading-relaxed font-bold">
+          <div className="font-roman text-lg text-gray-800 text-left whitespace-pre-wrap leading-relaxed font-bold">
             {children}
-          </p>
+          </div>
         </div>
         <div className="mt-4">
           <Link href={continueLink} className="font-roman text-xl text-black hover:underline font-bold">
-            Continue your journey >
+            Continue your journey 
           </Link>
         </div>
       </div>

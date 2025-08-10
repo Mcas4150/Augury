@@ -1,40 +1,7 @@
-# ── app/augur.py ───────────────────────────────────────────────────────
-import os, sys, json, pathlib, contextlib, yaml
-from llama_cpp import Llama, llama_log_set
-from .rules.engine import evaluate_omen          # ← relative import
-
-# silence llama.cpp logs
-llama_log_set(None, None)
-
-@contextlib.contextmanager
-def mute_native():
-    with open(os.devnull, "w") as devnull:
-        old_out, old_err = os.dup(1), os.dup(2)
-        os.dup2(devnull.fileno(), 1)
-        os.dup2(devnull.fileno(), 2)
-        try:
-            yield
-        finally:
-            os.dup2(old_out, 1)
-            os.dup2(old_err, 2)
-
-MODEL = pathlib.Path("models/llama3-8B-q4_k_m.gguf").expanduser()
-
-_llm = None
-def build_llm():
-    # with mute_native():
-        return Llama(
-            model_path=str(MODEL),
-            n_ctx=2048,
-            n_gpu_layers=20,            # Start with CPU-only
-            verbose=False,
-        )
-
-def get_llm():
-    global _llm
-    if _llm is None:
-        _llm = build_llm()
-    return _llm
+import json, pathlib, yaml
+from .rules.engine import evaluate_omen
+from .ollama_engine import OllamaEngine
+from .settings import settings
 
 SYSTEM = (
     "You are the Pontifex Augur of Rome. "
@@ -49,22 +16,20 @@ RULES_PATH = pathlib.Path(__file__).parent / "augury_rules.yaml"
 with RULES_PATH.open("r", encoding="utf-8") as f:
     rules = yaml.safe_load(f)
 
-def omen(data: dict) -> str:
+_engine = OllamaEngine(settings.OLLAMA_URL, settings.OLLAMA_MODEL)
+
+def build_prompt(data: dict) -> str:
     facts = data.copy()
     facts.update(evaluate_omen(facts))
-    prompt = f"{SYSTEM}\n{TEMPLATE.format(facts=json.dumps(facts, indent=2))}"
+    return f"{SYSTEM}\n{TEMPLATE.format(facts=json.dumps(facts, indent=2))}"
 
-    with mute_native():
-        text = get_llm()(
-            prompt,
-            max_tokens=200,
-            temperature=0.8,
-            top_p=0.9,
-            repeat_penalty=1.1,
-            stop=["<END>"]
-        )["choices"][0]["text"]
-
+def omen(data: dict) -> str:
+    prompt = build_prompt(data)
+    text = _engine.generate(
+        prompt,
+        max_tokens=settings.NUM_PREDICT,
+        temperature=settings.TEMP,
+        stop=["<END>"],
+        options={"num_ctx": settings.NUM_CTX, "num_batch": settings.NUM_BATCH, "repeat_penalty": 1.1},
+    )
     return text.strip().removesuffix("<END>").strip()
-
-if __name__ == "__main__":
-    print(omen(json.loads(sys.stdin.read())))

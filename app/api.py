@@ -1,71 +1,61 @@
-# ── app/api.py ─────────────────────────────────────────────────────────
-import random, os, uuid, base64, subprocess, tempfile, platform
+import os, uuid, base64, subprocess, tempfile, platform, random
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Body
 from pydantic import BaseModel
-from .settings import settings
 import edge_tts
 
-from .augur import omen, get_llm
-from .rules.engine import evaluate_omen     # ← relative import
+from .augur import omen
+from .rules.engine import evaluate_omen
+from .settings import settings
 
-router = APIRouter()                         # router, not FastAPI
-
-# ── Schemas ────────────────────────────────────────────────────────────
-
+router = APIRouter()
 
 class OmenResponse(BaseModel):
     proclamation: str
     judgement: str
 
-class AudioResponse(BaseModel):
-    proclamation: str
-    judgement: str
+class AudioResponse(OmenResponse):
     audio_base64: str
 
-# ── Text-only endpoint ────────────────────────────────────────────────
+class FactsIn(BaseModel):
+    species: str | None = None
+    side: str | None = None
+
 @router.post("/proclaim", response_model=OmenResponse)
-def proclaim(_: dict | None = Body(None)):
-    try:
-        get_llm()
-        if settings.LATEST_SPECIES is None:
-            raise HTTPException(503, "No bird detected yet")
+def proclaim(facts: FactsIn | None = Body(None)):
+    species = (facts.species if facts else None) or settings.LATEST_SPECIES
+    if species is None:
+        raise HTTPException(503, "No bird detected yet")
+    side = (facts.side if facts else None) or random.choice(["dexter", "sinister"])
+    data = {"species": species, "side": side}
 
-        side  = random.choice(["dexter", "sinister"])
-        facts = {"species": settings.LATEST_SPECIES, "side": side}
-        judgement  = evaluate_omen(facts)["omen"]
-        text       = omen(facts)
+    judgement = evaluate_omen(data)["omen"]
+    text = omen(data)
+    return {"proclamation": text, "judgement": judgement}
 
-        return {"proclamation": text, "judgement": judgement}
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
-
-# ── Audio + text endpoint ─────────────────────────────────────────────
 @router.post("/proclaim/audio", response_model=AudioResponse)
-async def proclaim_audio():
-    try:
-        get_llm()
-        facts      = req.dict()
-        judgement  = evaluate_omen(facts)["omen"]
-        text       = omen(facts)
+async def proclaim_audio(facts: FactsIn | None = Body(None)):
+    species = (facts.species if facts else None) or settings.LATEST_SPECIES
+    if species is None:
+        raise HTTPException(503, "No bird detected yet")
+    side = (facts.side if facts else None) or random.choice(["dexter", "sinister"])
+    data = {"species": species, "side": side}
 
-        tmp_path = Path(tempfile.gettempdir()) / f"omen_{uuid.uuid4().hex}.mp3"
-        communicate = edge_tts.Communicate(text, voice="en-US-GuyNeural")
-        await communicate.save(str(tmp_path))
+    judgement = evaluate_omen(data)["omen"]
+    text = omen(data)
 
-        b64 = base64.b64encode(tmp_path.read_bytes()).decode("ascii")
+    tmp = Path(tempfile.gettempdir()) / f"omen_{uuid.uuid4().hex}.mp3"
+    tts = edge_tts.Communicate(text, voice="en-US-GuyNeural")
+    await tts.save(str(tmp))
+    b64 = base64.b64encode(tmp.read_bytes()).decode("ascii")
 
-        if platform.system() == "Darwin":
-            subprocess.Popen(["afplay", str(tmp_path)],
-                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        elif platform.system() == "Windows":
-            subprocess.Popen(["powershell", "-c",
-                              f"(New-Object Media.SoundPlayer '{tmp_path}').PlaySync()"],
-                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    # optional local playback
+    if platform.system() == "Darwin":
+        subprocess.Popen(["afplay", str(tmp)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    elif platform.system() == "Windows":
+        subprocess.Popen(["powershell", "-c", f"(New-Object Media.SoundPlayer '{tmp}').PlaySync()"],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-        tmp_path.unlink(missing_ok=True)
-        return {"proclamation": text, "judgement": judgement, "audio_base64": b64}
-
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+    tmp.unlink(missing_ok=True)
+    return {"proclamation": text, "judgement": judgement, "audio_base64": b64}
