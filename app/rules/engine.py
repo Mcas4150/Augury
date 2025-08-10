@@ -27,12 +27,16 @@ def evaluate_omen(fact: dict) -> dict:
     species_class = "oscines" if sp in _rules["oscines"] else None
 
     if species_class == "oscines":
-        bird_judgment = _rules["oscines"][sp]
-        side_judgment = _rules["sides"].get(side, None)
+        bird_judgment = _rules["oscines"].get(sp)
+        side_judgment = _rules["sides"].get(side)
         logic.append(f"{sp} is oscine → judged by side")
         logic.append(f"{side} side → {side_judgment}")
+
         if bird_judgment == "favourable" and side_judgment == "favourable":
             return {"omen": "faustum", "logic": logic}
+        elif bird_judgment is None or side_judgment is None:
+            logic.append("missing specific data for bird or side")
+            return {"omen": "incertum", "logic": logic}
         else:
             return {"omen": "inafaustum", "logic": logic}
 

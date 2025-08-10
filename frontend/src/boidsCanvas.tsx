@@ -21,7 +21,7 @@ const PERCEPTION = 38;       // ↓ radius ⇒ tighter flock
 const ALIGN_W = 2.5;         // alignment weight
 const COH_W   = 1.0;         // cohesion weight
 const SEP_W   = 1.8;         // separation weight
-const MAX_FORCE_BASE = 0.12; // per–frame steering clamp (scaled by speed)
+const MAX_FORCE_BASE = 0.5; // per–frame steering clamp (scaled by speed)
 
 interface BoidsCanvasProps {
   trigger?: number;

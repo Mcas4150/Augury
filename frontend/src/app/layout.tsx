@@ -29,13 +29,13 @@ export default function RootLayout({
     <Link href="/" style={{ marginRight: '20px', fontSize: '18px' }}>Home</Link>
     <Link href="/passage" style={{ marginRight: '20px', fontSize: '18px' }}>Passage</Link>
     <Link href="/birddoors" style={{ marginRight: '20px', fontSize: '18px' }}>Bird Doors</Link>
-    <Link href="/forest" style={{ marginRight: '20px', fontSize: '18px' }}>Forest</Link>
+    {/* <Link href="/forest" style={{ marginRight: '20px', fontSize: '18px' }}>Forest</Link>
     <Link href="/shore" style={{ marginRight: '20px', fontSize: '18px' }}>Shore</Link>
-    <Link href="/hill" style={{ marginRight: '20px', fontSize: '18px' }}>Hill</Link>
+    <Link href="/hill" style={{ marginRight: '20px', fontSize: '18px' }}>Hill</Link> */}
     {/* <Link href="/augury" style={{ marginRight: '20px', fontSize: '18px' }}>Augury</Link> */}
-    <Link href="/game" style={{ marginRight: '20px', fontSize: '18px' }}>Game</Link>
+    {/* <Link href="/game" style={{ marginRight: '20px', fontSize: '18px' }}>Game</Link>
     <Link href="/game2" style={{ marginRight: '20px', fontSize: '18px' }}>Game 2</Link>
-    <Link href="/game3" style={{ marginRight: '20px', fontSize: '18px' }}>Game 3</Link>
+    <Link href="/game3" style={{ marginRight: '20px', fontSize: '18px' }}>Game 3</Link> */}
     <Link href="/context" style={{ marginRight: '20px', fontSize: '18px' }}>Context</Link>
     <Link href="/docs" style={{ fontSize: '18px' }}>Documentation</Link>
   </nav>
