@@ -9,9 +9,19 @@ interface Boid {
   vy: number;
 }
 
+// Sprite + spawn
 const BIRD_W = 100;
 const BIRD_H = 100;
-const SPAWN_MARGIN = BIRD_W + 40; // keep sprites fully off-screen
+const SPAWN_MARGIN = BIRD_W + 40;
+
+// Flocking tuning
+const NUM_BOIDS = 50;
+const BASE_MAX_SPEED = 13.5;  // ↑ cap ⇒ faster flock
+const PERCEPTION = 38;       // ↓ radius ⇒ tighter flock
+const ALIGN_W = 2.5;         // alignment weight
+const COH_W   = 1.0;         // cohesion weight
+const SEP_W   = 1.8;         // separation weight
+const MAX_FORCE_BASE = 0.12; // per–frame steering clamp (scaled by speed)
 
 interface BoidsCanvasProps {
   trigger?: number;
@@ -59,21 +69,21 @@ export default function BoidsCanvas({
       // Force ALL boids from the same side — fly toward the opposite direction
       const fromLeft = flyInSide === "left";
 
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < NUM_BOIDS; i++) {
         const startX = fromLeft
           ? -SPAWN_MARGIN - Math.random() * 200
           : W + SPAWN_MARGIN + Math.random() * 200;
         const startY = Math.random() * H;
 
-        // Spawn with horizontal push inward; small vertical variance
-        const vx = (fromLeft ? 1 : -1) * (3 + Math.random() * 2) * speed;
+        // Faster spawn push inward; small vertical variance
+        const vx = (fromLeft ? 1 : -1) * (4 + Math.random() * 3) * speed;
         const vy = (Math.random() - 0.5) * 1.0 * speed;
 
         boids.push({ x: startX, y: startY, vx, vy });
       }
     } else {
       flyInCompleteRef.current = true;
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < NUM_BOIDS; i++) {
         boids.push({
           x: Math.random() * W,
           y: Math.random() * H,
@@ -110,9 +120,9 @@ export default function BoidsCanvas({
     const boids = initializeBoids(W, H, flyInOnStart);
     boidsRef.current = boids;
 
-    const baseMaxSpeed = 2;
-    const basePerception = 50;
-    const steerFactorBase = 0.05;
+    const baseMaxSpeed = BASE_MAX_SPEED;
+    const basePerception = PERCEPTION;
+    const steerFactorBase = 0.05; // scaled by speed each frame
 
     function updateBoids() {
       const isConsult = consultingRef.current;
@@ -138,6 +148,7 @@ export default function BoidsCanvas({
       }
 
       const steerFactor = steerFactorBase * globalSpeed;
+      const steerLimit = MAX_FORCE_BASE * globalSpeed;
 
       boids.forEach((b) => {
         // Only apply flocking behavior after fly-in is complete
@@ -163,13 +174,27 @@ export default function BoidsCanvas({
           }
 
           if (total > 0) {
+            // averages
             align.x /= total;
             align.y /= total;
             coh.x = coh.x / total - b.x;
             coh.y = coh.y / total - b.y;
 
-            b.vx += align.x * steerFactor + coh.x * steerFactor + sep.x * steerFactor;
-            b.vy += align.y * steerFactor + coh.y * steerFactor + sep.y * steerFactor;
+            // weighted steering — tighter flock via strong cohesion+separation
+            const ax = align.x * ALIGN_W + coh.x * COH_W + sep.x * SEP_W;
+            const ay = align.y * ALIGN_W + coh.y * COH_W + sep.y * SEP_W;
+
+            // scale by steerFactor then clamp per–frame force
+            let addX = ax * steerFactor;
+            let addY = ay * steerFactor;
+            const addMag = Math.hypot(addX, addY) || 1;
+            if (addMag > steerLimit) {
+              addX = (addX / addMag) * steerLimit;
+              addY = (addY / addMag) * steerLimit;
+            }
+
+            b.vx += addX;
+            b.vy += addY;
           }
 
           if (isConsult) {
@@ -220,6 +245,7 @@ export default function BoidsCanvas({
 
     function drawBoids() {
       // Clear with transparent background
+      const ctx = canvas.getContext("2d")!;
       ctx.save();
       ctx.globalCompositeOperation = "source-over";
       ctx.clearRect(0, 0, W, H);
