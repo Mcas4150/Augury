@@ -4,11 +4,19 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Modal from '@/Modal';
 import ScrollComponent from '@/ScrollComponent';
+import { useWebSocket } from '@/useWebSocket';
+
+const wsUrl = "ws://10.0.0.232:9987";
 
 export default function BirdDoorsPage() {
   const [isLeftModalOpen, setIsLeftModalOpen] = useState(false);
   const [isMiddleModalOpen, setIsMiddleModalOpen] = useState(false);
   const [isRightModalOpen, setIsRightModalOpen] = useState(false);
+  const { send } = useWebSocket(wsUrl);
+
+  const handleModalClick = (message: string) => {
+    send(message);
+  };
 
   const leftScrollContent = (
     <div>
@@ -65,19 +73,28 @@ export default function BirdDoorsPage() {
         />
 
         <button
-          onClick={() => setIsLeftModalOpen(true)}
+          onClick={() => {
+            setIsLeftModalOpen(true);
+            handleModalClick("forest");
+          }}
           title="Open Left Scroll"
           className="absolute hover:cursor-pointer"
           style={{ top: '50%', left: '25%', width: '9%', height: '30%' }}
         />
         <button
-          onClick={() => setIsMiddleModalOpen(true)}
+          onClick={() => {
+            setIsMiddleModalOpen(true);
+            handleModalClick("shore");
+          }}
           title="Open Middle Scroll"
           className="absolute hover:cursor-pointer"
           style={{ top: '50%', left: '44%', width: '9%', height: '30%' }}
         />
         <button
-          onClick={() => setIsRightModalOpen(true)}
+          onClick={() => {
+            setIsRightModalOpen(true);
+            handleModalClick("hill");
+          }}
           title="Open Right Scroll"
           className="absolute hover:cursor-pointer"
           style={{ top: '50%', left: '64%', width: '7%', height: '30%' }}
