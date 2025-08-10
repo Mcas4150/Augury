@@ -85,7 +85,7 @@ export default function AuguryApp() {
           </button>
         </div>
 
-        {judgement && (
+        {/* {judgement && (
           <div className="text-xl">
             Judgement: <strong>{judgement}</strong>
           </div>
@@ -95,7 +95,7 @@ export default function AuguryApp() {
           <div className="bg-white text-black p-6 rounded-lg shadow-lg overflow-auto">
             <div className="whitespace-pre-wrap font-roman">{proclamation}</div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
