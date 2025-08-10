@@ -9,33 +9,81 @@ interface Boid {
   vy: number;
 }
 
+const BIRD_W = 100;
+const BIRD_H = 100;
+const SPAWN_MARGIN = BIRD_W + 40; // keep sprites fully off-screen
+
 interface BoidsCanvasProps {
-  trigger?: number; // used to "jolt" the system if you ever want
-  isConsulting?: boolean; // when true, boids speed ↑ and color changes
+  trigger?: number;
+  isConsulting?: boolean;
+  flyInOnStart?: boolean;
+  flyInSide?: "left" | "right";
+  speed?: number;        // global speed scaler
+  consultBoost?: number; // speed multiplier during consulting
 }
 
 export default function BoidsCanvas({
   trigger,
   isConsulting = false,
+  flyInOnStart = false,
+  flyInSide = "left",
+  speed = 1,
+  consultBoost = 3,
 }: BoidsCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // we'll keep our boids and loop handle in refs so they survive re-renders
+  // state that survives re-renders
   const boidsRef = useRef<Boid[]>([]);
   const rafRef = useRef<number>(0);
   const birdImageRef = useRef<HTMLImageElement | null>(null);
+  const flyInCompleteRef = useRef<boolean>(false);
 
-  // a ref to hold the latest consulting flag inside our animation loop
+  // latest consulting flag for the loop
   const consultingRef = useRef(isConsulting);
   consultingRef.current = isConsulting;
 
   const loadBirdImage = () => {
     const birdImage = new Image();
-    // Add a cache-busting query parameter
     birdImage.src = `/comfyui/Bird1.png?t=${new Date().getTime()}`;
     birdImage.onload = () => {
       birdImageRef.current = birdImage;
     };
+  };
+
+  const initializeBoids = (W: number, H: number, shouldFlyIn: boolean) => {
+    const boids: Boid[] = [];
+
+    if (shouldFlyIn) {
+      flyInCompleteRef.current = false;
+
+      // Force ALL boids from the same side — fly toward the opposite direction
+      const fromLeft = flyInSide === "left";
+
+      for (let i = 0; i < 50; i++) {
+        const startX = fromLeft
+          ? -SPAWN_MARGIN - Math.random() * 200
+          : W + SPAWN_MARGIN + Math.random() * 200;
+        const startY = Math.random() * H;
+
+        // Spawn with horizontal push inward; small vertical variance
+        const vx = (fromLeft ? 1 : -1) * (3 + Math.random() * 2) * speed;
+        const vy = (Math.random() - 0.5) * 1.0 * speed;
+
+        boids.push({ x: startX, y: startY, vx, vy });
+      }
+    } else {
+      flyInCompleteRef.current = true;
+      for (let i = 0; i < 50; i++) {
+        boids.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 2 * speed,
+          vy: (Math.random() - 0.5) * 2 * speed,
+        });
+      }
+    }
+
+    return boids;
   };
 
   useEffect(() => {
@@ -44,7 +92,7 @@ export default function BoidsCanvas({
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext("2d", { alpha: true })!;
     const parent = canvas.parentElement!;
-    
+
     let W: number, H: number;
 
     const resizeCanvas = () => {
@@ -54,109 +102,132 @@ export default function BoidsCanvas({
 
     const resizeObserver = new ResizeObserver(() => resizeCanvas());
     resizeObserver.observe(parent);
-    
-    resizeCanvas(); // Initial size
-    
-    // Ensure canvas background is transparent
-    canvas.style.backgroundColor = 'transparent';
 
-    // initialize boids only once
-    const boids: Boid[] = Array.from({ length: 50 }, () => ({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      vx: (Math.random() - 0.5) * 2,
-      vy: (Math.random() - 0.5) * 2,
-    }));
+    resizeCanvas(); // initial size
+    canvas.style.backgroundColor = "transparent";
+
+    // initialize boids
+    const boids = initializeBoids(W, H, flyInOnStart);
     boidsRef.current = boids;
 
     const baseMaxSpeed = 2;
     const basePerception = 50;
-    const steerFactor = 0.05;
+    const steerFactorBase = 0.05;
 
     function updateBoids() {
       const isConsult = consultingRef.current;
-      const speedMultiplier = isConsult ? 3 : 1; // triple speed when consulting
+      const globalSpeed = speed * (isConsult ? consultBoost : 1);
+
+      // Check if fly-in is complete — consider sprite size
+      if (!flyInCompleteRef.current && flyInOnStart) {
+        const allBoidsOnScreen = boids.every(
+          (b) => b.x >= BIRD_W * 0.5 && b.x <= W - BIRD_W * 0.5
+        );
+        if (allBoidsOnScreen) {
+          flyInCompleteRef.current = true;
+          // normalize/cap after entry
+          boids.forEach((b) => {
+            const s = Math.hypot(b.vx, b.vy);
+            const maxS = baseMaxSpeed * globalSpeed;
+            if (s > maxS) {
+              b.vx = (b.vx / s) * maxS;
+              b.vy = (b.vy / s) * maxS;
+            }
+          });
+        }
+      }
+
+      const steerFactor = steerFactorBase * globalSpeed;
 
       boids.forEach((b) => {
-        let align = { x: 0, y: 0 },
-          coh = { x: 0, y: 0 },
-          sep = { x: 0, y: 0 };
-        let total = 0;
+        // Only apply flocking behavior after fly-in is complete
+        if (flyInCompleteRef.current) {
+          let align = { x: 0, y: 0 },
+            coh = { x: 0, y: 0 },
+            sep = { x: 0, y: 0 };
+          let total = 0;
 
-        for (let o of boids) {
-          const dx = o.x - b.x,
-            dy = o.y - b.y,
-            d = Math.hypot(dx, dy);
-          if (o !== b && d < basePerception) {
-            align.x += o.vx;
-            align.y += o.vy;
-            coh.x += o.x;
-            coh.y += o.y;
-            sep.x += b.x - o.x;
-            sep.y += b.y - o.y;
-            total++;
+          for (let o of boids) {
+            const dx = o.x - b.x;
+            const dy = o.y - b.y;
+            const d = Math.hypot(dx, dy);
+            if (o !== b && d < basePerception) {
+              align.x += o.vx;
+              align.y += o.vy;
+              coh.x += o.x;
+              coh.y += o.y;
+              sep.x += b.x - o.x;
+              sep.y += b.y - o.y;
+              total++;
+            }
+          }
+
+          if (total > 0) {
+            align.x /= total;
+            align.y /= total;
+            coh.x = coh.x / total - b.x;
+            coh.y = coh.y / total - b.y;
+
+            b.vx += align.x * steerFactor + coh.x * steerFactor + sep.x * steerFactor;
+            b.vy += align.y * steerFactor + coh.y * steerFactor + sep.y * steerFactor;
+          }
+
+          if (isConsult) {
+            // center of canvas
+            const cx = W / 2;
+            const cy = H / 2;
+            // vector from center to boid
+            const dx = b.x - cx;
+            const dy = b.y - cy;
+            const dist = Math.hypot(dx, dy) || 1;
+            // perpendicular (–dy, dx) to create circular motion
+            const perpX = -dy / dist;
+            const perpY = dx / dist;
+
+            const spiralStrength = 1.5 * globalSpeed;
+            const pullStrength = 0.5 * globalSpeed;
+
+            const inwardX = -dx / dist;
+            const inwardY = -dy / dist;
+
+            b.vx += perpX * spiralStrength + inwardX * pullStrength;
+            b.vy += perpY * spiralStrength + inwardY * pullStrength;
           }
         }
 
-        if (total > 0) {
-          align.x /= total;
-          align.y /= total;
-          coh.x = coh.x / total - b.x;
-          coh.y = coh.y / total - b.y;
-
-          b.vx +=
-            align.x * steerFactor + coh.x * steerFactor + sep.x * steerFactor;
-          b.vy +=
-            align.y * steerFactor + coh.y * steerFactor + sep.y * steerFactor;
+        // limit speed — global cap scales with globalSpeed
+        const sNow = Math.hypot(b.vx, b.vy);
+        const maxS = baseMaxSpeed * globalSpeed;
+        if (sNow > maxS) {
+          b.vx = (b.vx / sNow) * maxS;
+          b.vy = (b.vy / sNow) * maxS;
         }
 
-        // limit speed
-        const speed = Math.hypot(b.vx, b.vy);
-        const maxSpeed = baseMaxSpeed * speedMultiplier;
-        if (speed > maxSpeed) {
-          b.vx = (b.vx / speed) * maxSpeed;
-          b.vy = (b.vy / speed) * maxSpeed;
+        // movement: no wrap during fly-in; wrap after
+        if (flyInOnStart && !flyInCompleteRef.current) {
+          b.x += b.vx;
+          b.y += b.vy;
+
+          // keep them from drifting too far vertically during fly-in
+          if (b.y < -SPAWN_MARGIN) b.y = -SPAWN_MARGIN;
+          if (b.y > H + SPAWN_MARGIN) b.y = H + SPAWN_MARGIN;
+        } else {
+          b.x = (b.x + b.vx + W) % W;
+          b.y = (b.y + b.vy + H) % H;
         }
-
-        if (isConsult) {
-          // center of canvas
-          const cx = W / 2;
-          const cy = H / 2;
-          // vector from center to boid
-          const dx = b.x - cx;
-          const dy = b.y - cy;
-          const dist = Math.hypot(dx, dy) || 1;
-          // perpendicular (–dy, dx) to create circular motion
-          const perpX = -dy / dist;
-          const perpY = dx / dist;
-          // how strongly they spiral
-          const spiralStrength = 1.5;
-
-          // **new** radial pull
-          const pullStrength = 0.5; // tweak between 0 = no pull, up to ~1 for very tight pull
-          const inwardX = -dx / dist;
-          const inwardY = -dy / dist;
-
-          b.vx += perpX * spiralStrength + inwardX * pullStrength;
-          b.vy += perpY * spiralStrength + inwardY * pullStrength;
-        }
-
-        // move & wrap
-        b.x = (b.x + b.vx + W) % W;
-        b.y = (b.y + b.vy + H) % H;
       });
     }
 
     function drawBoids() {
       // Clear with transparent background
       ctx.save();
-      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalCompositeOperation = "source-over";
       ctx.clearRect(0, 0, W, H);
       ctx.restore();
-      
+
       const birdImg = birdImageRef.current;
 
-      // if consulting, enable glow
+      // consulting glow
       if (consultingRef.current) {
         ctx.shadowBlur = 15;
         ctx.shadowColor = "#88ddff";
@@ -165,7 +236,7 @@ export default function BoidsCanvas({
       }
 
       if (!birdImg) {
-        // Fallback to circles if image is not loaded
+        // fallback dots
         ctx.fillStyle = "#fff";
         for (let b of boidsRef.current) {
           ctx.beginPath();
@@ -179,17 +250,8 @@ export default function BoidsCanvas({
       for (let b of boidsRef.current) {
         ctx.save();
         ctx.translate(b.x, b.y);
-        // rotate to face direction of movement
         ctx.rotate(Math.atan2(b.vy, b.vx));
-        const birdWidth = 100;
-        const birdHeight = 100;
-        ctx.drawImage(
-          birdImg,
-          -birdWidth / 2,
-          -birdHeight / 2,
-          birdWidth,
-          birdHeight
-        );
+        ctx.drawImage(birdImg, -BIRD_W / 2, -BIRD_H / 2, BIRD_W, BIRD_H);
         ctx.restore();
       }
       ctx.shadowBlur = 0;
@@ -207,20 +269,24 @@ export default function BoidsCanvas({
       resizeObserver.disconnect();
       cancelAnimationFrame(rafRef.current);
     };
-  }, []); // <-- only run on mount
+  }, [flyInOnStart, flyInSide, speed, consultBoost]); // re-init when these change
 
-  // if you ever want to "jolt" things on `trigger`, you can react to it here:
+  // optional "jolt" on trigger
   useEffect(() => {
     if (!trigger) return;
-    // reload the bird image to get the latest version
     loadBirdImage();
 
-    // e.g. reset velocities randomly
+    // randomize velocities — scale by current speed
     boidsRef.current.forEach((b) => {
-      b.vx = (Math.random() - 0.5) * 2;
-      b.vy = (Math.random() - 0.5) * 2;
+      b.vx = (Math.random() - 0.5) * 2 * speed;
+      b.vy = (Math.random() - 0.5) * 2 * speed;
     });
-  }, [trigger]);
+  }, [trigger, speed]);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full bg-transparent" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full bg-transparent"
+    />
+  );
 }

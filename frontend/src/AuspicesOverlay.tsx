@@ -99,7 +99,7 @@ export default function AuspicesOverlay({ isGameWon, textProps }) {
       {/* Boids Overlay - Layer 40 (highest) */}
       {showBoids && (
         <div className="absolute inset-0 z-40 w-full h-full pointer-events-none">
-          <BoidsCanvas trigger={boidTrigger} isConsulting={loading} />
+          <BoidsCanvas trigger={boidTrigger} isConsulting={loading} flyInOnStart={true} />
         </div>
       )}
     </>
