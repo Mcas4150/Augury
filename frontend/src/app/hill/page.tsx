@@ -59,7 +59,7 @@ const scrollContent = (
     {/* Manually add the "Continue" link */}
     <div className="text-center mt-8 pt-4">
         <Link href="/game3" className="font-roman text-xl text-black hover:underline font-bold">
-          Continue your journey >
+          Continue your journey 
         </Link>
     </div>
   </div>
