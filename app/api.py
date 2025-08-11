@@ -1,13 +1,13 @@
-import os, uuid, base64, subprocess, tempfile, platform, random
-from pathlib import Path
+import base64
+import random
 
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, Body, HTTPException
 from pydantic import BaseModel
-import edge_tts
 
 from .augur import omen
 from .rules.engine import evaluate_omen
 from .settings import settings
+from .tts import synthesize
 
 router = APIRouter()
 
@@ -45,17 +45,12 @@ async def proclaim_audio(facts: FactsIn | None = Body(None)):
     judgement = evaluate_omen(data)["omen"]
     text = omen(data)
 
-    tmp = Path(tempfile.gettempdir()) / f"omen_{uuid.uuid4().hex}.mp3"
-    tts = edge_tts.Communicate(text, voice="en-US-GuyNeural")
-    await tts.save(str(tmp))
-    b64 = base64.b64encode(tmp.read_bytes()).decode("ascii")
+    try:
+        audio_bytes, mime = await synthesize(text, temperature=0.3)
+    except Exception as e:
+        # Log full detail server-side; return clean message client-side
+        # (FastAPI will still log the exception message)
+        raise HTTPException(status_code=502, detail=f"TTS failed — {e}")
 
-    # optional local playback
-    if platform.system() == "Darwin":
-        subprocess.Popen(["afplay", str(tmp)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    elif platform.system() == "Windows":
-        subprocess.Popen(["powershell", "-c", f"(New-Object Media.SoundPlayer '{tmp}').PlaySync()"],
-                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-    tmp.unlink(missing_ok=True)
+    b64 = base64.b64encode(audio_bytes).decode("ascii")
     return {"proclamation": text, "judgement": judgement, "audio_base64": b64}

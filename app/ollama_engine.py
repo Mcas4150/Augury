@@ -27,7 +27,7 @@ class OllamaEngine:
         if options:
             payload["options"].update(options)
         if stop:
-            payload["stop"] = stop
+            payload["options"]["stop"] = stop
 
         r = requests.post(self.url, json=payload, timeout=600)
         r.raise_for_status()
