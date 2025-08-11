@@ -9,3 +9,4 @@ python-dotenv
 numpy
 librosa
 pydantic_settings
+httpx>=0.27

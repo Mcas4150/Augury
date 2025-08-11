@@ -46,6 +46,13 @@ cd frontend
 npm run dev
 ```
 
+Run Ollama
+```
+$env:OLLAMA_LOG_LEVEL = "debug"
+>> $env:OLLAMA_HOST = "127.0.0.1:11435"
+>> & "$env:LOCALAPPDATA\Programs\Ollama\ollama.exe" serve
+```
+
 ## Dev Notes
 	•	All llama.cpp output (Metal, ggml, perf) is suppressed.
 	•	Augury rules live in augury_rules.yaml.

@@ -1,9 +1,8 @@
-import os, uuid, base64, subprocess, tempfile, platform, random
-from pathlib import Path
+import base64
+import random
 
 from fastapi import APIRouter, Body, HTTPException
 from pydantic import BaseModel
-import edge_tts
 
 from .augur import omen
 from .rules.engine import evaluate_omen

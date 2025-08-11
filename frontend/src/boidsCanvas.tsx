@@ -16,12 +16,13 @@ const SPAWN_MARGIN = BIRD_W + 40;
 
 // Flocking tuning
 const NUM_BOIDS = 50;
-const BASE_MAX_SPEED = 13.5;  // ↑ cap ⇒ faster flock
-const PERCEPTION = 38;       // ↓ radius ⇒ tighter flock
-const ALIGN_W = 2.5;         // alignment weight
-const COH_W   = 1.0;         // cohesion weight
-const SEP_W   = 1.8;         // separation weight
-const MAX_FORCE_BASE = 0.5; // per–frame steering clamp (scaled by speed)
+const BASE_MAX_SPEED = 8.0;   // Reduced for better control
+const PERCEPTION = 38;         // ↓ radius ⇒ tighter flock
+const ALIGN_W = 1.0;          // alignment weight (reduced)
+const COH_W   = 0.5;          // cohesion weight (reduced) 
+const SEP_W   = 1.5;          // separation weight
+const MAX_FORCE_BASE = 0.8;   // per–frame steering clamp (increased)
+const ATTRACT_W = 8.0;        // mouse attraction weight (significantly increased)
 
 interface BoidsCanvasProps {
   trigger?: number;
@@ -47,10 +48,15 @@ export default function BoidsCanvas({
   const rafRef = useRef<number>(0);
   const birdImageRef = useRef<HTMLImageElement | null>(null);
   const flyInCompleteRef = useRef<boolean>(false);
+  const mousePosition = useRef({ x: -1, y: -1 });
 
   // latest consulting flag for the loop
   const consultingRef = useRef(isConsulting);
   consultingRef.current = isConsulting;
+
+  // Keep speed ref updated
+  const speedRef = useRef(speed);
+  speedRef.current = speed;
 
   const loadBirdImage = () => {
     const birdImage = new Image();
@@ -62,12 +68,15 @@ export default function BoidsCanvas({
 
   const initializeBoids = (W: number, H: number, shouldFlyIn: boolean) => {
     const boids: Boid[] = [];
+    const currentSpeed = speedRef.current;
 
     if (shouldFlyIn) {
       flyInCompleteRef.current = false;
 
-      // Force ALL boids from the same side — fly toward the opposite direction
+      // Force ALL boids from the same side — fly toward center initially
       const fromLeft = flyInSide === "left";
+      const targetX = W / 2; // Aim for center initially
+      const targetY = H / 2;
 
       for (let i = 0; i < NUM_BOIDS; i++) {
         const startX = fromLeft
@@ -75,9 +84,13 @@ export default function BoidsCanvas({
           : W + SPAWN_MARGIN + Math.random() * 200;
         const startY = Math.random() * H;
 
-        // Faster spawn push inward; small vertical variance
-        const vx = (fromLeft ? 1 : -1) * (4 + Math.random() * 3) * speed;
-        const vy = (Math.random() - 0.5) * 1.0 * speed;
+        // Direct velocity towards target with some randomness
+        const dx = targetX - startX;
+        const dy = targetY - startY;
+        const dist = Math.hypot(dx, dy);
+        
+        const vx = (dx / dist) * (3 + Math.random() * 2) * currentSpeed;
+        const vy = (dy / dist) * (3 + Math.random() * 2) * currentSpeed;
 
         boids.push({ x: startX, y: startY, vx, vy });
       }
@@ -87,8 +100,8 @@ export default function BoidsCanvas({
         boids.push({
           x: Math.random() * W,
           y: Math.random() * H,
-          vx: (Math.random() - 0.5) * 2 * speed,
-          vy: (Math.random() - 0.5) * 2 * speed,
+          vx: (Math.random() - 0.5) * 2 * currentSpeed,
+          vy: (Math.random() - 0.5) * 2 * currentSpeed,
         });
       }
     }
@@ -103,20 +116,42 @@ export default function BoidsCanvas({
     const ctx = canvas.getContext("2d", { alpha: true })!;
     const parent = canvas.parentElement!;
 
-    let W: number, H: number;
+    let W: number = 800, H: number = 600, DPR = window.devicePixelRatio || 1;
 
     const resizeCanvas = () => {
-      W = canvas.width = parent.clientWidth;
-      H = canvas.height = parent.clientHeight;
+      const r = parent.getBoundingClientRect();
+      W = Math.floor(r.width * DPR);
+      H = Math.floor(r.height * DPR);
+      canvas.width = W;
+      canvas.height = H;
+      canvas.style.width = r.width + "px";
+      canvas.style.height = r.height + "px";
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0); // draw in CSS pixels
     };
 
-    const resizeObserver = new ResizeObserver(() => resizeCanvas());
+    // Single mouse tracking system
+    const onMove = (e: MouseEvent) => {
+      const r = canvas.getBoundingClientRect();
+      const x = (e.clientX - r.left);
+      const y = (e.clientY - r.top);
+      // inside canvas? else disable attraction
+      if (x >= 0 && y >= 0 && x <= r.width && y <= r.height) {
+        // Scale mouse coords to match canvas coordinate system
+        mousePosition.current = { x: x * DPR, y: y * DPR };
+        console.log(`Mouse position: CSS(${x.toFixed(0)}, ${y.toFixed(0)}) -> Canvas(${(x * DPR).toFixed(0)}, ${(y * DPR).toFixed(0)})`);
+      } else {
+        mousePosition.current = { x: -1, y: -1 };
+      }
+    };
+
+    canvas.addEventListener("mousemove", onMove);
+    const resizeObserver = new ResizeObserver(resizeCanvas);
     resizeObserver.observe(parent);
 
     resizeCanvas(); // initial size
     canvas.style.backgroundColor = "transparent";
 
-    // initialize boids
+    // initialize boids (W and H are now set from resizeCanvas)
     const boids = initializeBoids(W, H, flyInOnStart);
     boidsRef.current = boids;
 
@@ -126,7 +161,8 @@ export default function BoidsCanvas({
 
     function updateBoids() {
       const isConsult = consultingRef.current;
-      const globalSpeed = speed * (isConsult ? consultBoost : 1);
+      const currentSpeed = speedRef.current;
+      const globalSpeed = currentSpeed * (isConsult ? consultBoost : 1);
 
       // Check if fly-in is complete — consider sprite size
       if (!flyInCompleteRef.current && flyInOnStart) {
@@ -158,6 +194,7 @@ export default function BoidsCanvas({
             sep = { x: 0, y: 0 };
           let total = 0;
 
+          // Flocking behavior
           for (let o of boids) {
             const dx = o.x - b.x;
             const dy = o.y - b.y;
@@ -197,6 +234,33 @@ export default function BoidsCanvas({
             b.vy += addY;
           }
 
+          // Mouse attraction (when not consulting and mouse is in canvas)
+          if (!isConsult && mousePosition.current.x >= 0) {
+            const { x: mx, y: my } = mousePosition.current;
+            const dx = mx - b.x;
+            const dy = my - b.y;
+            const dist = Math.hypot(dx, dy) || 1;
+
+            // Simple attraction force
+            const attractStrength = ATTRACT_W * globalSpeed;
+            const attractX = (dx / dist) * attractStrength;
+            const attractY = (dy / dist) * attractStrength;
+
+            // Apply steering limits
+            let addX = attractX * steerFactor;
+            let addY = attractY * steerFactor;
+            
+            const addMag = Math.hypot(addX, addY) || 1;
+            if (addMag > steerLimit * 2) { // Allow stronger mouse attraction
+              addX = (addX / addMag) * steerLimit * 2;
+              addY = (addY / addMag) * steerLimit * 2;
+            }
+
+            b.vx += addX;
+            b.vy += addY;
+          }
+
+          // Consulting spiral behavior
           if (isConsult) {
             // center of canvas
             const cx = W / 2;
@@ -292,6 +356,7 @@ export default function BoidsCanvas({
     loop();
 
     return () => {
+      canvas.removeEventListener("mousemove", onMove);
       resizeObserver.disconnect();
       cancelAnimationFrame(rafRef.current);
     };
@@ -303,9 +368,10 @@ export default function BoidsCanvas({
     loadBirdImage();
 
     // randomize velocities — scale by current speed
+    const currentSpeed = speedRef.current;
     boidsRef.current.forEach((b) => {
-      b.vx = (Math.random() - 0.5) * 2 * speed;
-      b.vy = (Math.random() - 0.5) * 2 * speed;
+      b.vx = (Math.random() - 0.5) * 2 * currentSpeed;
+      b.vy = (Math.random() - 0.5) * 2 * currentSpeed;
     });
   }, [trigger, speed]);
 
