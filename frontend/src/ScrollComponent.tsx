@@ -1,9 +1,7 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import React from 'react';
 
-// The component now accepts a "continueLink" prop
-const ScrollComponent = ({ children, continueLink = "/" }) => {
+const ScrollComponent = ({ children }) => {
   return (
     <div className="relative w-full h-full">
       <Image
@@ -14,16 +12,12 @@ const ScrollComponent = ({ children, continueLink = "/" }) => {
         quality={100}
         priority
       />
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
+      <div className="absolute inset-0 flex items-center justify-center">
         <div className="w-full max-w-lg h-3/5 p-4 overflow-y-auto">
-          <p className="font-roman text-lg text-gray-800 text-left whitespace-pre-wrap leading-relaxed font-bold">
+          {/* The class change is on the next line */}
+          <div className="flex flex-col items-center font-roman text-lg text-gray-800 text-center whitespace-pre-wrap leading-relaxed font-bold">
             {children}
-          </p>
-        </div>
-        <div className="mt-4">
-          <Link href={continueLink} className="font-roman text-xl text-black hover:underline font-bold">
-            Continue your journey >
-          </Link>
+          </div>
         </div>
       </div>
     </div>
