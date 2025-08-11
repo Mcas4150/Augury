@@ -1,6 +1,7 @@
- "use client";
+"use client";
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import Modal from '@/Modal';
 import ScrollComponent from '@/ScrollComponent';
 
@@ -9,31 +10,47 @@ export default function BirdDoorsPage() {
   const [isMiddleModalOpen, setIsMiddleModalOpen] = useState(false);
   const [isRightModalOpen, setIsRightModalOpen] = useState(false);
 
-  // The text is now a JSX element for detailed styling
   const leftScrollContent = (
     <div>
-      <p className="text-center font-bold">Path of Attunement</p>
-      <br />
-      <p className="text-center">
-        ‘Come hither, as thou farest, renowned Odysseus, <br />
-        great glory of the Achaeans; <br />
-        stay thy ship that thou mayest listen to the voice of us two. <br />
-        For never yet has any man rowed past this isle in his black ship<br />
-        until he has heard the sweet voice from our lips. <br />
-        Nay, he has joy of it, and goes his way a wiser man. <br />
-        For we know all the toils that in wide Troy the Argives and Trojans endured <br />
-        through the will of the gods, <br />
-        and we know all things that come to pass upon the fruitful earth.
-      </p>
-      <br />
-      <p className="text-left">
-        The Siren’s Call (The Odyssey, 12)
-      </p>
+      <p>Towards Attunement</p>
+      <div className="flex justify-center my-4">
+        <Image src="/media/swarm1.png" alt="Swarm 1" width={300} height={200} />
+      </div>
+      <div className="text-center mt-6">
+        <Link href="/forest" className="font-roman text-xl text-black hover:underline font-bold">
+          Continue your journey >
+        </Link>
+      </div>
     </div>
   );
 
-  const middleScrollText = `This is the scroll for the middle door, with its own message.`;
-  const rightScrollText = `This is the scroll for the right door, revealing a different secret.`;
+  const middleScrollContent = (
+    <div>
+      <p>Towards Imitation of Life</p>
+      <div className="flex justify-center my-4">
+        <Image src="/media/swarm2.png" alt="Swarm 2" width={300} height={200} />
+      </div>
+      <div className="text-center mt-6">
+        <Link href="/shore" className="font-roman text-xl text-black hover:underline font-bold">
+          Continue your journey >
+        </Link>
+      </div>
+    </div>
+  );
+
+  const rightScrollContent = (
+    <div>
+      <p>Towards Akasha</p>
+      <div className="flex justify-center my-4">
+        <Image src="/media/swarm3.png" alt="Swarm 3" width={300} height={200} />
+      </div>
+      <div className="text-center mt-6">
+        <Link href="/hill" className="font-roman text-xl text-black hover:underline font-bold">
+          Continue your journey >
+        </Link>
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -69,22 +86,22 @@ export default function BirdDoorsPage() {
 
       <Modal isOpen={isLeftModalOpen} onClose={() => setIsLeftModalOpen(false)}>
         <div className="w-full h-[80vh]">
-          <ScrollComponent continueLink="/forest">
+          <ScrollComponent>
             {leftScrollContent}
           </ScrollComponent>
         </div>
       </Modal>
       <Modal isOpen={isMiddleModalOpen} onClose={() => setIsMiddleModalOpen(false)}>
         <div className="w-full h-[80vh]">
-          <ScrollComponent continueLink="/shore">
-            {middleScrollText}
+          <ScrollComponent>
+            {middleScrollContent}
           </ScrollComponent>
         </div>
       </Modal>
       <Modal isOpen={isRightModalOpen} onClose={() => setIsRightModalOpen(false)}>
         <div className="w-full h-[80vh]">
-          <ScrollComponent continueLink="/hill">
-            {rightScrollText}
+          <ScrollComponent>
+            {rightScrollContent}
           </ScrollComponent>
         </div>
       </Modal>
