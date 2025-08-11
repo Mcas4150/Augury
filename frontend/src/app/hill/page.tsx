@@ -67,8 +67,6 @@ const scrollContent = (
 
 export default function HillPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-<<<<<<< HEAD
-=======
   const { send } = useWebSocket();
 
   useEffect(() => {
@@ -76,7 +74,6 @@ export default function HillPage() {
   }, [send]);
 
   const scrollText = `From this vantage point, the shape of the world seems clear.`;
->>>>>>> 105fac5 (add sounds websocket provider)
 
   return (
     <>

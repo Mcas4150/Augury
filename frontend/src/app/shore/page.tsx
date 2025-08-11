@@ -67,8 +67,6 @@ const scrollContent = (
 
 export default function ShorePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-<<<<<<< HEAD
-=======
   const { send } = useWebSocket();
 
   useEffect(() => {
@@ -76,7 +74,6 @@ export default function ShorePage() {
   }, [send]);
 
   const scrollText = `Waves crash upon the shore, echoing forgotten words.`;
->>>>>>> 105fac5 (add sounds websocket provider)
 
   return (
     <>
