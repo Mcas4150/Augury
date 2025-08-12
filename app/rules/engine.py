@@ -43,3 +43,51 @@ def evaluate_omen(fact: dict) -> dict:
     # fallback
     logic.append(f"{sp} unknown or unsupported")
     return {"omen": "incertum", "logic": logic}
+
+
+
+def inaugurate_omen(fact: dict) -> dict:
+    # inputs: prior favor & chosen door
+    raw_favor = fact.get("favor", "")
+    raw_door  = fact.get("door", "")
+
+    favor = raw_favor.strip().lower()
+    door  = raw_door.strip().lower()
+
+    favor_syns = _rules.get("favor_synonyms", {})
+    door_syns  = _rules.get("door_synonyms", {})
+
+    favor = favor_syns.get(favor, favor)
+    door  = door_syns.get(door, door)
+
+    logic = []
+
+    doors = _rules.get("doors", {})
+    door_node = doors.get(door)
+    if not door_node:
+        logic.append(f"door '{door}' unknown")
+        return {"omen": "incertum", "logic": logic}
+
+    if favor == "favourable":
+        outcome = "faustum"
+    elif favor == "unfavourable":
+        outcome = "inafaustum"
+    else:
+        outcome = "incertum"
+
+    logic.append(f"door={door} → contexts found")
+    logic.append(f"favor={favor} → outcome={outcome}")
+
+    # surface structured context so the LLM can riff sensibly
+    return {
+        "omen": outcome,
+        "door": door,
+        "favor": favor,
+        "context": {
+            "title": door_node.get("title"),
+            "good": door_node.get("good"),
+            "bad":  door_node.get("bad"),
+            "primer": door_node.get("primer"),  # optional, see YAML below
+        },
+        "logic": logic,
+    }

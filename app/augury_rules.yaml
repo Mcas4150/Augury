@@ -1,3 +1,4 @@
+#augury_rules.yaml
 synonyms:
   raven:            "corvus corax"
   crow:             "corvus brachyrhynchos"
@@ -47,3 +48,42 @@ outcomes:
   faustum:    "Faustum augurium"
   inafaustum: "Dirum augurium"
   incertum:   "Omen incertum"
+
+
+
+favor_synonyms:
+  favourable: favourable
+  favorable: favourable
+  faustum: favourable
+  inafaustum: unfavourable
+  dirum: unfavourable
+  incertum: incertum
+
+door_synonyms:
+  left: attunement
+  middle: imitation
+  right: akasha
+  forest: attunement
+  shore: imitation
+  hill: akasha
+
+doors:
+  attunement:
+    title: "Attunement — Bioacoustics"
+    primer: |
+      Early Computational Precursor (c. 1980s–90s): Digital Signal Processing (DSP) & Spectrogram Analysis. Early bioacoustics relied on converting sound into visual spectrograms. A human expert identified patterns of frequency, duration, and amplitude — the computer handled transforms like FFT.
+      Modern AI Implementation: Convolutional Neural Networks (e.g., BirdNET). Trained on millions of labeled examples, it outputs probabilistic confidence rather than brittle rules.
+    good: |
+      Augury (Attunement, bioacoustics): Non-invasive biodiversity monitoring — sensor networks listen continuously, tracking populations and migration while minimizing disturbance. Deep listening becomes stewardship.
+    bad: |
+      Inauguration (Mass Surveillance): The same stack pivots to urban surveillance — “anomalous sounds,” arguments, shouts, breaking glass. The city becomes an automated, unseen listener that polices behavior.
+  imitation:
+    title: "Imitation of Life — Synthetic Worlds"
+    primer: "Early Computational Precursor (c. 1980s-90s): Procedural Generation & Rule-Based Systems. Early artificial life like Boids, fractal art, and demoscene graphics created immense complexity from simple, human-written rules. A Boid's behavior (separation, alignment, cohesion) is explicitly programmed. A fractal is the visualization of a simple mathematical equation iterated infinitely. The output is a deterministic, though often surprising, result of its initial code. It mimics the rules of a system, not the data. Modern AI Implementation: Diffusion Models (e.g., ComfyUI/Stable Diffusion). These models don't follow explicit rules. They are trained on vast datasets of existing images and learn the latent, statistical connections between concepts (text prompts) and visual information. When you ask for a bird, it doesn't execute draw_bird(); it navigates a high-dimensional space of possibilities to generate a novel image that fits the probabilistic pattern of bird it has learned."
+    good:   "Augury (Generative Ecology)  This application moves beyond a static image to create a living digital diorama. After identifying a bird, the system uses L-systems to grow the specific plants and trees that make up its habitat, and cellular automata to simulate the behavior of insects or ground cover. The result is a small, dynamic ecosystem generated just for that bird. The player's act of observation gives rise to a simulated world, fostering a deeper understanding of ecological interdependence. It's mimicry as a tool for seeing the whole system, not just the individual."
+    bad:    "Inauguration (Synthetic Deception): The generation of deepfakes and plausible misinformation. This technology can be used to create evidence of events that never occurred, impersonate individuals, or flood information ecosystems with synthetic content that devalues authentic images and reporting, ultimately eroding trust in the real as such"
+  akasha:
+    title: "Akasha — Memory/Archive"
+    primer: "Early Computational Precursor (c. 1980s-90s): Expert Systems & Relational Databases. An expert system was a form of early AI that tried to capture a human expert's knowledge in a rigid, tree-like structure of IF-THEN rules. For example, IF  has feathers AND can fly THEN is bird. The categories were predefined, brittle, and manually constructed by humans. The knowledge was encoded, not learned. Modern AI Implementation: Large Language Models (e.g., Llama). An LLM doesn't use a predefined decision tree. It categorizes information based on the statistical proximity of words and concepts in its training data. A bird is defined by its relationship to words like fly, nest, feather, sky, etc. Its taxonomy is emergent, fluid, and often reveals biases present in its training data. The categories are not absolute but are probabilistic clusters of meaning."
+    good:   " Augury (The Anarchive): RHIZOME Using the LLM's ability to see novel connections to build a digital anarchive. It can cross-reference scientific papers, ancient texts on augury, poetry, and datasets to reveal hidden relationships between human culture and the natural world. It helps users navigate information intuitively, fostering discovery and interdisciplinary understanding."
+    bad:    "Inauguration (Algorithmic Governance): ARBORESCENT/ KAFKAESQUE. Using automated categorization for social sorting and predictive policing. Models are used to assign risk scores for loans, insurance, parole, and employment. These systems create rigid, often discriminatory classifications based on biased historical data, reinforcing hegemonic power structures and punishing deviation from the norm under a veneer of objective, intelligent authority."
