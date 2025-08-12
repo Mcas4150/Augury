@@ -26,8 +26,8 @@ export default function RootLayout({
         <body className={`${cinzel.variable} antialiased bg-black text-white`}>
           <header>
            <nav style={{ padding: '20px', borderBottom: '1px solid #555', marginBottom: '20px' }}>
-    <Link href="/" style={{ marginRight: '20px', fontSize: '18px' }}>Home</Link>
-    <Link href="/passage" style={{ marginRight: '20px', fontSize: '18px' }}>Passage</Link>
+    {/* <Link href="/" style={{ marginRight: '20px', fontSize: '18px' }}>Home</Link>
+    <Link href="/passage" style={{ marginRight: '20px', fontSize: '18px' }}>Passage</Link> */}
     <Link href="/birddoors" style={{ marginRight: '20px', fontSize: '18px' }}>Bird Doors</Link>
     {/* <Link href="/forest" style={{ marginRight: '20px', fontSize: '18px' }}>Forest</Link>
     <Link href="/shore" style={{ marginRight: '20px', fontSize: '18px' }}>Shore</Link>
@@ -36,8 +36,8 @@ export default function RootLayout({
     {/* <Link href="/game" style={{ marginRight: '20px', fontSize: '18px' }}>Game</Link>
     <Link href="/game2" style={{ marginRight: '20px', fontSize: '18px' }}>Game 2</Link>
     <Link href="/game3" style={{ marginRight: '20px', fontSize: '18px' }}>Game 3</Link> */}
-    <Link href="/context" style={{ marginRight: '20px', fontSize: '18px' }}>Context</Link>
-    <Link href="/docs" style={{ fontSize: '18px' }}>Documentation</Link>
+    {/* <Link href="/context" style={{ marginRight: '20px', fontSize: '18px' }}>Context</Link>
+    <Link href="/docs" style={{ fontSize: '18px' }}>Documentation</Link> */}
   </nav>
           </header>
 

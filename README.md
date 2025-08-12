@@ -38,7 +38,7 @@ curl -L -o models/llama3-8B-q4_k_m.gguf \
 
 Run Backend
 ```
-uvicorn api:app --reload --port 8000
+uvicorn app:app --host 0.0.0.0 --port 8000
 ```
 Run Fronend
 ```

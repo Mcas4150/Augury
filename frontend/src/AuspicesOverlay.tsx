@@ -2,6 +2,7 @@
 import React, { useRef, useState } from "react";
 import BoidsCanvas from "./boidsCanvas";
 import { useWebSocket } from "./useWebSocket";
+import { useRouter } from "next/navigation";
 
 const wsUrl = "ws://10.0.0.232:9987";
 
@@ -24,6 +25,7 @@ export default function AuspicesOverlay({ isGameWon, textProps }) {
   const lastUrlRef = useRef<string | null>(null);
 
   const { send } = useWebSocket(wsUrl);
+  const router = useRouter();
 
   const stopAndCleanupAudio = () => {
     audioRef.current?.pause();
@@ -83,6 +85,7 @@ export default function AuspicesOverlay({ isGameWon, textProps }) {
     setProclamation("");
     setJudgement(null);
     setShowBoids(false);
+    router.push('/forum');
   };
 
   return (
@@ -107,7 +110,7 @@ export default function AuspicesOverlay({ isGameWon, textProps }) {
         <div className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 space-y-6">
           {judgement && <div className="text-2xl font-roman text-white text-center">Judgement: <strong>{judgement}</strong></div>}
 
-          <button onClick={handleClose} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg">Close</button>
+          <button onClick={handleClose} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg">Return to Forum</button>
         </div>
       )}
 

@@ -106,7 +106,7 @@ export default function AuspicesOverlay({ isGameWon, textProps }) {
               <div className="whitespace-pre-wrap font-mono">{proclamation}</div>
             </div>
           )} */}
-          <button onClick={handleClose} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg">Close</button>
+          <button onClick={handleClose} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg">Return to Forum</button>
         </div>
       )}
 
