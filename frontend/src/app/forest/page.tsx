@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link'; // Import Link
 import Modal from '@/Modal';
@@ -9,11 +9,18 @@ import { useWebSocket } from '@/useWebSocket';
 export default function ForestPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { send } = useWebSocket();
+    const effectRan = useRef(false);
+  const [imageKey] = useState(Date.now());
 
-  useEffect(() => {
-    send("forest");
-  }, [send]);
-
+ useEffect(() => {
+   if (effectRan.current === false) {
+     send("forest"); // or "shoregen", "forestgen"
+ 
+     return () => {
+       effectRan.current = true;
+     };
+   }
+ }, []);
   const scrollContent = (
     <div>
       <div className="flex justify-center mb-4">
@@ -61,7 +68,7 @@ export default function ForestPage() {
       {/* New "Continue" Link */}
       <div className="text-center mt-6">
           <Link href="/game" className="font-roman text-xl text-black hover:underline font-bold">
-            Continue your journey >
+            Continue your journey 
           </Link>
       </div>
     </div>
@@ -71,7 +78,7 @@ export default function ForestPage() {
     <>
       <main className="relative w-screen h-screen">
         <Image
-          src="/media/forest.png"
+          src={`/comfyui/Forest1.png?t=${imageKey}`}
           alt="A dense forest"
           layout="fill"
           objectFit="cover"

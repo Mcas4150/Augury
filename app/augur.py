@@ -19,7 +19,7 @@ SYSTEM = (
     "• Offer terse rationale under 'NOTAE:' — 3 bullet lines. "
     "• Then, under 'OMEN:', proclaim the verdict in ≤120 words, ending with '<END>'."
 )
-TEMPLATE = "FACTS:\n{facts}\nNOTAE:\n"
+TEMPLATE = "FACTS:\n{facts}\nTHINK:\n"
 
 
 SYSTEM2 = (
@@ -28,7 +28,7 @@ SYSTEM2 = (
     "• Begin with 'My people, The Gods have spoken' "
     "• Then, proclaim the verdict in ≤240 words, ending with '<END>'."
 )
-TEMPLATE2 = "FACTS:\n{facts}\nNOTAE:\n"
+TEMPLATE2 = "FACTS:\n{facts}\nTHINK:\n"
 
 RULES_PATH = pathlib.Path(__file__).parent / "augury_rules.yaml"
 with RULES_PATH.open("r", encoding="utf-8") as f:

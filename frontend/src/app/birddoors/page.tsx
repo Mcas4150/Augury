@@ -1,14 +1,29 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Modal from '@/Modal';
 import ScrollComponent from '@/ScrollComponent';
+import { useWebSocket } from '@/useWebSocket';
 
 export default function BirdDoorsPage() {
   const [isLeftModalOpen, setIsLeftModalOpen] = useState(false);
   const [isMiddleModalOpen, setIsMiddleModalOpen] = useState(false);
   const [isRightModalOpen, setIsRightModalOpen] = useState(false);
+  const [imageKey] = useState(Date.now());
+    const effectRan = useRef(false);
+      const { send } = useWebSocket();
+
+  useEffect(() => {
+    if (effectRan.current === false) {
+      send("forumGen"); // or "shoregen", "forestgen"
+  
+      return () => {
+        effectRan.current = true;
+      };
+    }
+  }, []);
+  
 
   const leftScrollContent = (
     <div>
@@ -18,7 +33,7 @@ export default function BirdDoorsPage() {
       </div>
       <div className="text-center mt-6">
         <Link href="/forest" className="font-roman text-xl text-black hover:underline font-bold">
-          Continue your journey >
+          Continue your journey 
         </Link>
       </div>
     </div>
@@ -32,7 +47,7 @@ export default function BirdDoorsPage() {
       </div>
       <div className="text-center mt-6">
         <Link href="/shore" className="font-roman text-xl text-black hover:underline font-bold">
-          Continue your journey >
+          Continue your journey 
         </Link>
       </div>
     </div>
@@ -46,7 +61,7 @@ export default function BirdDoorsPage() {
       </div>
       <div className="text-center mt-6">
         <Link href="/hill" className="font-roman text-xl text-black hover:underline font-bold">
-          Continue your journey >
+          Continue your journey 
         </Link>
       </div>
     </div>
@@ -56,7 +71,7 @@ export default function BirdDoorsPage() {
     <>
       <main className="relative w-screen h-screen">
         <Image
-          src="/media/throneroom.png"
+          src={`/comfyui/Doorway.png?t=${imageKey}`}
           alt="An empty throne room"
           layout="fill"
           objectFit="cover"

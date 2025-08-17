@@ -1,15 +1,35 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import GameComponent from '@/GameComponent';
 import AuspicesOverlay from '@/AuspicesOverlay';
 import Image from 'next/image';
+import { useWebSocket } from '@/useWebSocket';
 
-export default function GamePage2() {
+
+export default function GamePage3() {
   const [isGameWon, setIsGameWon] = useState(false);
   const [textProps, setTextProps] = useState({ centerX: 0, centerY: 0, fontSize: 0 });
+  const { send } = useWebSocket();
+  const effectRan = useRef(false);
 
-  const handleGameWon = (gameTextProps) => {
+  useEffect(() => {
+    if (effectRan.current === false) {
+      send("hillGen");
+
+      return () => {
+        effectRan.current = true;
+      };
+    }
+  }, []);
+
+  interface GameTextProps {
+    centerX: number;
+    centerY: number;
+    fontSize: number;
+  }
+
+  const handleGameWon = (gameTextProps: GameTextProps) => {
     setIsGameWon(true);
     // Convert game canvas coordinates to page coordinates
     const gameContainer = document.querySelector('.game-container');

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useWebSocket } from '@/useWebSocket';
@@ -7,12 +7,20 @@ import InaugurateButton from '@/InaugurateButton';
 
 export default function ForumPage() {
   const { send } = useWebSocket();
+    const effectRan = useRef(false);
   // Generate a new timestamp each time the component mounts (page loads)
   const [imageKey] = useState(Date.now());
 
+
   useEffect(() => {
-    send("forum");
-  }, [send]);
+    if (effectRan.current === false) {
+      send("doorwayGen"); // or "shoregen", "forestgen"
+
+      return () => {
+        effectRan.current = true;
+      };
+    }
+  }, []);
 
   return (
 <>

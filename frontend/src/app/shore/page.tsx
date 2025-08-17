@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link'; // Import the Link component
 import Modal from '@/Modal';
@@ -59,7 +59,7 @@ const scrollContent = (
     {/* Manually add the "Continue" link, matching the ForestPage example */}
     <div className="text-center mt-8 pt-4">
         <Link href="/game2" className="font-roman text-xl text-black hover:underline font-bold">
-          Continue your journey >
+          Continue your journey 
         </Link>
     </div>
   </div>
@@ -68,18 +68,24 @@ const scrollContent = (
 export default function ShorePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { send } = useWebSocket();
+    const effectRan = useRef(false);
+  const [imageKey] = useState(Date.now());
+useEffect(() => {
+  if (effectRan.current === false) {
+    send("shore"); // or "shoregen", "forestgen"
 
-  useEffect(() => {
-    send("shore");
-  }, [send]);
-
+    return () => {
+      effectRan.current = true;
+    };
+  }
+}, []);
   const scrollText = `Waves crash upon the shore, echoing forgotten words.`;
 
   return (
     <>
       <main className="relative w-screen h-screen">
         <Image
-          src="/media/shore.png"
+          src={`/comfyui/Shore1.png?t=${imageKey}`}
           alt="A rocky shore"
           fill
           style={{ objectFit: 'cover' }}

@@ -12,7 +12,7 @@ function base64ToBlobUrl(b64: string, mime = "audio/mpeg") {
 export default function InaugurateButton({ auto }: { auto?: boolean }) {
 //   const { favor, door } = useAuspices();
 const favor = "favourable";
-const door = "attunement";
+const door = "akasha";
   const [loading, setLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastUrlRef = useRef<string | null>(null);

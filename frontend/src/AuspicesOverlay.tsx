@@ -1,10 +1,9 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import BoidsCanvas from "./boidsCanvas";
 import { useWebSocket } from "./useWebSocket";
 import { useRouter } from "next/navigation";
 
-const wsUrl = "ws://10.0.0.232:9987";
 
 function base64ToBlobUrl(b64: string, mime = "audio/mpeg") {
   const bin = atob(b64);
@@ -13,7 +12,16 @@ function base64ToBlobUrl(b64: string, mime = "audio/mpeg") {
   return URL.createObjectURL(new Blob([bytes], { type: mime }));
 }
 
-export default function AuspicesOverlay({ isGameWon, textProps }) {
+interface AuspicesOverlayProps {
+  isGameWon: boolean;
+  textProps: {
+    centerX: number;
+    centerY: number;
+    fontSize: number;
+  };
+}
+
+export default function AuspicesOverlay({ isGameWon, textProps }: AuspicesOverlayProps) {
   const [proclamation, setProclamation] = useState("");
   const [judgement, setJudgement] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -23,8 +31,7 @@ export default function AuspicesOverlay({ isGameWon, textProps }) {
   // Invisible player — never added to the DOM
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastUrlRef = useRef<string | null>(null);
-
-  const { send } = useWebSocket(wsUrl);
+  const { send } = useWebSocket();
   const router = useRouter();
 
   const stopAndCleanupAudio = () => {
@@ -37,7 +44,9 @@ export default function AuspicesOverlay({ isGameWon, textProps }) {
   };
 
   const handleTakeAuspices = async () => {
+    // send("forumGen");
     send("divinate");
+
     setLoading(true);
     setProclamation("");
     setJudgement(null);

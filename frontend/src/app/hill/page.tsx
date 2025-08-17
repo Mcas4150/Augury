@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Modal from '@/Modal';
@@ -68,18 +68,25 @@ const scrollContent = (
 export default function HillPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { send } = useWebSocket();
+    const effectRan = useRef(false);
+  const [imageKey] = useState(Date.now());
 
   useEffect(() => {
-    send("hill");
-  }, [send]);
+    if (effectRan.current === false) {
+      send("hill"); // or "shoregen", "forestgen"
 
+      return () => {
+        effectRan.current = true;
+      };
+    }
+  }, []);
   const scrollText = `From this vantage point, the shape of the world seems clear.`;
 
   return (
     <>
       <main className="relative w-screen h-screen">
         <Image
-          src="/media/hill.png"
+          src={`/comfyui/Hill1.png?t=${imageKey}`}
           alt="A windswept hill"
           fill
           style={{ objectFit: 'cover' }}
