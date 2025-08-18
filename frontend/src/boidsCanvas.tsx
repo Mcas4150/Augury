@@ -28,18 +28,18 @@ interface BoidsCanvasProps {
   trigger?: number;
   isConsulting?: boolean;
   flyInOnStart?: boolean;
-  flyInSide?: "left" | "right";
-  speed?: number;        // global speed scaler
-  consultBoost?: number; // speed multiplier during consulting
+  speed?: number;
+  consultBoost?: number;
+  onDirectionDetermined?: (direction: "left" | "right") => void;
 }
 
 export default function BoidsCanvas({
   trigger,
   isConsulting = false,
   flyInOnStart = false,
-  flyInSide = "left",
   speed = 1,
   consultBoost = 3,
+  onDirectionDetermined,
 }: BoidsCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -73,7 +73,12 @@ export default function BoidsCanvas({
     if (shouldFlyIn) {
       flyInCompleteRef.current = false;
 
-      // Force ALL boids from the same side — fly toward center initially
+      // Randomly choose a side and report it
+      const flyInSide = Math.random() < 0.5 ? "left" : "right";
+      if (onDirectionDetermined) {
+        onDirectionDetermined(flyInSide);
+      }
+
       const fromLeft = flyInSide === "left";
       const targetX = W / 2; // Aim for center initially
       const targetY = H / 2;
@@ -360,7 +365,7 @@ export default function BoidsCanvas({
       resizeObserver.disconnect();
       cancelAnimationFrame(rafRef.current);
     };
-  }, [flyInOnStart, flyInSide, speed, consultBoost]); // re-init when these change
+  }, [flyInOnStart, speed, consultBoost, onDirectionDetermined]); // re-init when these change
 
   // optional "jolt" on trigger
   useEffect(() => {

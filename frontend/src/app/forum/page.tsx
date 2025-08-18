@@ -7,10 +7,9 @@ import InaugurateButton from '@/InaugurateButton';
 
 export default function ForumPage() {
   const { send } = useWebSocket();
-    const effectRan = useRef(false);
-  // Generate a new timestamp each time the component mounts (page loads)
+  const effectRan = useRef(false);
   const [imageKey] = useState(Date.now());
-
+  const [isAudioFinished, setIsAudioFinished] = useState(false);
 
   useEffect(() => {
     if (effectRan.current === false) {
@@ -35,12 +34,15 @@ export default function ForumPage() {
         priority
         unoptimized
       />
-             <div className="absolute top-10 left-1/2 -translate-x-1/2">
-    <Link href="/birddoors" className="font-roman text-lg text-white hover:underline">
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-4">
+        {isAudioFinished ? (
+          <Link href="/birddoors" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg">
             Return to Main
-      </Link>
-      <InaugurateButton/>
-</div>
+          </Link>
+        ) : (
+          <InaugurateButton onAudioFinish={() => setIsAudioFinished(true)} />
+        )}
+      </div>
       {/* Game Component Container - Layer 10 */}
      
     </main>

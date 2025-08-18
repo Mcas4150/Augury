@@ -9,7 +9,7 @@ function base64ToBlobUrl(b64: string, mime = "audio/mpeg") {
   return URL.createObjectURL(new Blob([bytes], { type: mime }));
 }
 
-export default function InaugurateButton({ auto }: { auto?: boolean }) {
+export default function InaugurateButton({ auto, onAudioFinish }: { auto?: boolean; onAudioFinish?: () => void }) {
 //   const { favor, door } = useAuspices();
 const favor = "favourable";
 const door = "akasha";
@@ -37,7 +37,12 @@ const door = "akasha";
       const data = await res.json();
       const url = base64ToBlobUrl(data.audio_base64, data.mime || "audio/mpeg");
       lastUrlRef.current = url;
-      if (!audioRef.current) audioRef.current = new Audio();
+      if (!audioRef.current) {
+        audioRef.current = new Audio();
+        if (onAudioFinish) {
+          audioRef.current.onended = onAudioFinish;
+        }
+      }
       audioRef.current.src = url;
       await audioRef.current.play();
     } finally {

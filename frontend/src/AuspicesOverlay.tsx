@@ -27,6 +27,7 @@ export default function AuspicesOverlay({ isGameWon, textProps }: AuspicesOverla
   const [loading, setLoading] = useState(false);
   const [boidTrigger, setBoidTrigger] = useState(0);
   const [showBoids, setShowBoids] = useState(false);
+  const [flyInDirection, setFlyInDirection] = useState<"left" | "right">("left");
 
   // Invisible player — never added to the DOM
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -54,7 +55,13 @@ export default function AuspicesOverlay({ isGameWon, textProps }: AuspicesOverla
     stopAndCleanupAudio();
 
     try {
-      const res = await fetch("http://localhost:8000/proclaim/audio", { method: "POST" });
+      const res = await fetch("http://localhost:8000/proclaim/audio", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ flyInDirection }),
+      });
       if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
       const data = await res.json();
 
@@ -125,7 +132,12 @@ export default function AuspicesOverlay({ isGameWon, textProps }: AuspicesOverla
 
       {showBoids && (
         <div className="absolute inset-0 z-40 w-full h-full pointer-events-none">
-          <BoidsCanvas trigger={boidTrigger} isConsulting={loading} flyInOnStart />
+          <BoidsCanvas
+            trigger={boidTrigger}
+            isConsulting={loading}
+            flyInOnStart
+            onDirectionDetermined={setFlyInDirection}
+          />
         </div>
       )}
     </>

@@ -22,6 +22,9 @@ class FactsIn(BaseModel):
     species: str | None = None
     side: str | None = None
 
+class ProclaimIn(BaseModel):
+    flyInDirection: str
+
 class OmenIn(BaseModel):
     favor: str | None = None
     door: str | None = None
@@ -39,11 +42,12 @@ def proclaim(facts: FactsIn | None = Body(None)):
     return {"proclamation": text, "judgement": judgement}
 
 @router.post("/proclaim/audio", response_model=AudioResponse)
-async def proclaim_audio(facts: FactsIn | None = Body(None)):
-    species = (facts.species if facts else None) or settings.LATEST_SPECIES
+async def proclaim_audio(proclaim_in: ProclaimIn):
+    species = settings.LATEST_SPECIES
     if species is None:
         raise HTTPException(503, "No bird detected yet")
-    side = (facts.side if facts else None) or random.choice(["dexter", "sinister"])
+    
+    side = proclaim_in.flyInDirection
     data = {"species": species, "side": side}
 
     judgement = evaluate_omen(data)["omen"]
