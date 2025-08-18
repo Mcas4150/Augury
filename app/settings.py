@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     # Cross-task data
     DETECTION_Q: asyncio.Queue = asyncio.Queue()
     LATEST_SPECIES: str | None = None
+    # Temporary testing flag: when true, the API will return a random "favorable" or "unfavorable" omen
+    # (env var: AUGURY_TEMP_RANDOM_OMEN=true)
+    TEMP_RANDOM_OMEN: bool = True
 
     TTS_MODE: str = "elevenlabs"  # "elevenlabs" | "subprocess" | "http"
 

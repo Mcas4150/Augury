@@ -37,7 +37,10 @@ def proclaim(facts: FactsIn | None = Body(None)):
     side = (facts.side if facts else None) or random.choice(["dexter", "sinister"])
     data = {"species": species, "side": side}
 
-    judgement = evaluate_omen(data)["omen"]
+    if settings.TEMP_RANDOM_OMEN:
+        judgement = random.choice(["favorable", "unfavorable"])
+    else:
+        judgement = evaluate_omen(data)["omen"]
     text = omen(data)
     return {"proclamation": text, "judgement": judgement}
 
@@ -50,7 +53,10 @@ async def proclaim_audio(proclaim_in: ProclaimIn):
     side = proclaim_in.flyInDirection
     data = {"species": species, "side": side}
 
-    judgement = evaluate_omen(data)["omen"]
+    if settings.TEMP_RANDOM_OMEN:
+        judgement = random.choice(["favorable", "unfavorable"])
+    else:
+        judgement = evaluate_omen(data)["omen"]
     text = omen(data)
 
     try:
@@ -69,7 +75,10 @@ async def inaugurate_audio(facts: OmenIn | None = Body(None)):
     favor = (facts.favor if facts else None) or random.choice(["good", "bad"])
     data = {"favor": favor, "door": facts.door}
 
-    judgement = inaugurate_omen(data)["omen"]
+    if settings.TEMP_RANDOM_OMEN:
+        judgement = random.choice(["favorable", "unfavorable"])
+    else:
+        judgement = inaugurate_omen(data)["omen"]
     text = inaugurate(data)
 
     try:
