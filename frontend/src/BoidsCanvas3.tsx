@@ -10,9 +10,10 @@ interface Boid {
 
 interface BoidsCanvas3Props {
   onDirectionDetermined: (direction: "left" | "right") => void;
+  showControls?: boolean; // when true the on-screen sliders are shown
 }
 
-const BoidsCanvas3: React.FC<BoidsCanvas3Props> = ({ onDirectionDetermined }) => {
+const BoidsCanvas3: React.FC<BoidsCanvas3Props> = ({ onDirectionDetermined, showControls = false }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const birdImgRef = useRef<HTMLImageElement | null>(null);
   const boids = useRef<Boid[]>([]);
@@ -287,6 +288,7 @@ const BoidsCanvas3: React.FC<BoidsCanvas3Props> = ({ onDirectionDetermined }) =>
 
   return (
     <>
+      {showControls && (
       <div style={{
         position: 'absolute',
         top: 12,
@@ -359,6 +361,7 @@ const BoidsCanvas3: React.FC<BoidsCanvas3Props> = ({ onDirectionDetermined }) =>
           />
         </div>
       </div>
+      )}
 
       <canvas
         ref={canvasRef}

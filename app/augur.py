@@ -38,12 +38,18 @@ _engine = OllamaEngine(settings.OLLAMA_URL, settings.OLLAMA_MODEL)
 
 def build_prompt(data: dict) -> str:
     facts = data.copy()
-    facts.update(evaluate_omen(facts))
+    # If an explicit 'omen' is already present in the incoming data (e.g. API override),
+    # prefer it — otherwise evaluate the rules engine.
+    if "omen" not in facts:
+        facts.update(evaluate_omen(facts))
     return f"{SYSTEM}\n{TEMPLATE.format(facts=json.dumps(facts, indent=2))}"
 
 def build_inaugurate_prompt(data: dict) -> str:
     facts = data.copy()
-    facts.update(inaugurate_omen(facts))
+    # Respect an explicit 'omen' if provided by the caller (API override),
+    # otherwise evaluate the inaugurate rules.
+    if "omen" not in facts:
+        facts.update(inaugurate_omen(facts))
     return f"{SYSTEM2}\n{TEMPLATE2.format(facts=json.dumps(facts, indent=2))}"
 
 def omen(data: dict) -> str:

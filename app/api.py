@@ -41,6 +41,8 @@ def proclaim(facts: FactsIn | None = Body(None)):
         judgement = random.choice(["favorable", "unfavorable"])
     else:
         judgement = evaluate_omen(data)["omen"]
+    # expose the chosen judgement into the prompt facts so the LLM sees the same omen
+    data["omen"] = judgement
     text = omen(data)
     return {"proclamation": text, "judgement": judgement}
 
@@ -57,6 +59,8 @@ async def proclaim_audio(proclaim_in: ProclaimIn):
         judgement = random.choice(["favorable", "unfavorable"])
     else:
         judgement = evaluate_omen(data)["omen"]
+    # expose the chosen judgement into the prompt facts so the LLM sees the same omen
+    data["omen"] = judgement
     text = omen(data)
 
     try:
@@ -79,6 +83,8 @@ async def inaugurate_audio(facts: OmenIn | None = Body(None)):
         judgement = random.choice(["favorable", "unfavorable"])
     else:
         judgement = inaugurate_omen(data)["omen"]
+    # expose the chosen judgement into the prompt facts so the LLM sees the same omen
+    data["omen"] = judgement
     text = inaugurate(data)
 
     try:
