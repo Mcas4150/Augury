@@ -58,7 +58,7 @@ const door = "akasha";
         const convolver = audioContext.createConvolver();
 
         // Fetch and decode the impulse response
-        const response = await fetch("/media/PS1_CHURCH.wav");
+        const response = await fetch("/media/PS1_HALL.wav");
         const arrayBuffer = await response.arrayBuffer();
         const impulseBuffer = await audioContext.decodeAudioData(arrayBuffer);
         convolver.buffer = impulseBuffer;
