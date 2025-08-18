@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 
 interface Boid {
   x: number;
@@ -19,18 +19,26 @@ const BoidsCanvas3: React.FC<BoidsCanvas3Props> = ({ onDirectionDetermined }) =>
   const animationFrameId = useRef<number | null>(null);
 
   const numBoids = 30;
-  const visualRange = 75; // How far boids can see
-  const protectedRange = 22; // How close boids try to stay from each other (slightly increased)
-  const centeringFactor = 0.0005; // Adjust velocity to move towards center of mass
-  const avoidFactor = 0.12; // Adjust velocity to avoid collisions (slightly stronger)
-  const matchingFactor = 0.05; // Adjust velocity to match nearby boids
+  const [visualRange, setVisualRange] = useState(75); // How far boids can see
+  const [protectedRange, setProtectedRange] = useState(22); // Personal space
+  const [centeringFactor, setCenteringFactor] = useState(0.0005); // Adjust velocity to move towards center of mass
+  const [avoidFactor, setAvoidFactor] = useState(0.12); // Adjust velocity to avoid collisions
+  const [matchingFactor, setMatchingFactor] = useState(0.05); // Adjust velocity to match nearby boids
   const turnFactor = 0.05; // How sharply boids turn to stay on screen
   const maxSpeed = 2;
   const minSpeed = 1;
-  const flockTightness = 1.5; // Lower value means tighter flock
+  const [flockTightness, setFlockTightness] = useState(1.5); // Lower value means tighter flock
 
   const canvasWidth = window.innerWidth;
   const canvasHeight = window.innerHeight;
+
+  // Refs for live-updating parameter values so the running animation reads the latest values
+  const visualRangeRef = useRef(75);
+  const protectedRangeRef = useRef(80);
+  const centeringFactorRef = useRef(0.0005);
+  const avoidFactorRef = useRef(0.5);
+  const matchingFactorRef = useRef(0.05);
+  const flockTightnessRef = useRef(0.5);
 
   const initBoids = useCallback(() => {
     boids.current = [];
@@ -92,6 +100,11 @@ const BoidsCanvas3: React.FC<BoidsCanvas3Props> = ({ onDirectionDetermined }) =>
   }, [canvasWidth, canvasHeight]);
 
   const flyTowardsCenter = useCallback((boid: Boid) => {
+    // read live values from refs
+    const vr = visualRangeRef.current;
+    const cf = centeringFactorRef.current;
+    const ft = flockTightnessRef.current;
+
     let centerX = 0;
     let centerY = 0;
     let numNeighbors = 0;
@@ -102,7 +115,7 @@ const BoidsCanvas3: React.FC<BoidsCanvas3Props> = ({ onDirectionDetermined }) =>
         const dy = boid.y - otherBoid.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        if (dist < visualRange) {
+        if (dist < vr) {
           centerX += otherBoid.x;
           centerY += otherBoid.y;
           numNeighbors++;
@@ -114,12 +127,15 @@ const BoidsCanvas3: React.FC<BoidsCanvas3Props> = ({ onDirectionDetermined }) =>
       centerX = centerX / numNeighbors;
       centerY = centerY / numNeighbors;
 
-      boid.vx += (centerX - boid.x) * centeringFactor * flockTightness;
-      boid.vy += (centerY - boid.y) * centeringFactor * flockTightness;
+      boid.vx += (centerX - boid.x) * cf * ft;
+      boid.vy += (centerY - boid.y) * cf * ft;
     }
-  }, [centeringFactor, visualRange, flockTightness]);
+  }, []); // uses refs for live values
 
   const avoidOthers = useCallback((boid: Boid) => {
+    const pr = protectedRangeRef.current;
+    const af = avoidFactorRef.current;
+
     let moveX = 0;
     let moveY = 0;
     let count = 0;
@@ -130,13 +146,13 @@ const BoidsCanvas3: React.FC<BoidsCanvas3Props> = ({ onDirectionDetermined }) =>
       const dy = boid.y - otherBoid.y;
       const dist = Math.hypot(dx, dy) || 0.0001;
 
-      if (dist < protectedRange) {
+      if (dist < pr) {
         // normalized direction away from the neighbor
         const nx = dx / dist;
         const ny = dy / dist;
 
         // strength ranges 0..1 (0 at protectedRange, 1 at overlap)
-        const strength = (protectedRange - dist) / protectedRange;
+        const strength = (pr - dist) / pr;
 
         // non-linear falloff so very-close boids are pushed away more strongly
         const falloff = strength * strength;
@@ -149,12 +165,15 @@ const BoidsCanvas3: React.FC<BoidsCanvas3Props> = ({ onDirectionDetermined }) =>
 
     if (count > 0) {
       // average the contributions and apply scaled avoidance
-      boid.vx += (moveX / count) * avoidFactor;
-      boid.vy += (moveY / count) * avoidFactor;
+      boid.vx += (moveX / count) * af;
+      boid.vy += (moveY / count) * af;
     }
-  }, [avoidFactor, protectedRange]);
+  }, []); // uses refs for live values
 
   const matchVelocity = useCallback((boid: Boid) => {
+    const vr = visualRangeRef.current;
+    const mf = matchingFactorRef.current;
+
     let avgVX = 0;
     let avgVY = 0;
     let numNeighbors = 0;
@@ -165,7 +184,7 @@ const BoidsCanvas3: React.FC<BoidsCanvas3Props> = ({ onDirectionDetermined }) =>
         const dy = boid.y - otherBoid.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        if (dist < visualRange) {
+        if (dist < vr) {
           avgVX += otherBoid.vx;
           avgVY += otherBoid.vy;
           numNeighbors++;
@@ -177,10 +196,10 @@ const BoidsCanvas3: React.FC<BoidsCanvas3Props> = ({ onDirectionDetermined }) =>
       avgVX = avgVX / numNeighbors;
       avgVY = avgVY / numNeighbors;
 
-      boid.vx += (avgVX - boid.vx) * matchingFactor;
-      boid.vy += (avgVY - boid.vy) * matchingFactor;
+      boid.vx += (avgVX - boid.vx) * mf;
+      boid.vy += (avgVY - boid.vy) * mf;
     }
-  }, [matchingFactor, visualRange]);
+  }, []); // uses refs for live values
 
   const limitSpeed = useCallback((boid: Boid) => {
     const speed = Math.sqrt(boid.vx * boid.vx + boid.vy * boid.vy);
@@ -267,19 +286,94 @@ const BoidsCanvas3: React.FC<BoidsCanvas3Props> = ({ onDirectionDetermined }) =>
   }, [canvasWidth, canvasHeight]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
+    <>
+      <div style={{
         position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        background: 'transparent',
-        zIndex: 10, // Ensure it's above other elements if needed
-        pointerEvents: 'none', // Allow clicks to pass through
-      }}
-    />
+        top: 12,
+        right: 12,
+        zIndex: 30,
+        background: 'rgba(0,0,0,0.6)',
+        padding: 10,
+        borderRadius: 8,
+        color: '#fff',
+        fontSize: 12,
+        pointerEvents: 'auto',
+        width: 220,
+      }}>
+        <div style={{ marginBottom: 8 }}>
+          <div>Protected Range: {protectedRange}px</div>
+          <input
+            type="range"
+            min={5}
+            max={80}
+            value={protectedRange}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              setProtectedRange(v);
+              protectedRangeRef.current = v;
+            }}
+          />
+        </div>
+        <div style={{ marginBottom: 8 }}>
+          <div>Avoid Factor: {avoidFactor.toFixed(3)}</div>
+          <input
+            type="range"
+            min={0}
+            max={0.5}
+            step={0.005}
+            value={avoidFactor}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              setAvoidFactor(v);
+              avoidFactorRef.current = v;
+            }}
+          />
+        </div>
+        <div style={{ marginBottom: 8 }}>
+          <div>Visual Range: {visualRange}px</div>
+          <input
+            type="range"
+            min={10}
+            max={300}
+            value={visualRange}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              setVisualRange(v);
+              visualRangeRef.current = v;
+            }}
+          />
+        </div>
+        <div>
+          <div>Flock Tightness: {flockTightness.toFixed(2)}</div>
+          <input
+            type="range"
+            min={0.5}
+            max={3}
+            step={0.05}
+            value={flockTightness}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              setFlockTightness(v);
+              flockTightnessRef.current = v;
+            }}
+          />
+        </div>
+      </div>
+
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'transparent',
+          zIndex: 10, // Ensure it's above other elements if needed
+          pointerEvents: 'none', // Allow clicks to pass through
+        }}
+      />
+    </>
   );
 };
 
