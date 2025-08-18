@@ -1,6 +1,6 @@
 "use client";
 import React, { useRef, useState, useEffect } from "react";
-import BoidsCanvas from "./boidsCanvas";
+import BoidsCanvas3 from "./BoidsCanvas3";
 import { useWebSocket } from "./useWebSocket";
 import { useRouter } from "next/navigation";
 
@@ -132,12 +132,13 @@ export default function AuspicesOverlay({ isGameWon, textProps }: AuspicesOverla
 
       {showBoids && (
         <div className="absolute inset-0 z-40 w-full h-full pointer-events-none">
-          <BoidsCanvas
+               {/* <BoidsCanvas
             trigger={boidTrigger}
             isConsulting={loading}
             flyInOnStart
             onDirectionDetermined={setFlyInDirection}
-          />
+          /> */}
+          <BoidsCanvas3 onDirectionDetermined={setFlyInDirection} />
         </div>
       )}
     </>

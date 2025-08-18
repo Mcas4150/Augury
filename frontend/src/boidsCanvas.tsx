@@ -16,9 +16,9 @@ const SPAWN_MARGIN = BIRD_W + 40;
 
 // Flocking tuning
 const NUM_BOIDS = 50;
-const BASE_MAX_SPEED = 8.0;   // Reduced for better control
+const BASE_MAX_SPEED = 3.0;   // Reduced for better control
 const PERCEPTION = 38;         // ↓ radius ⇒ tighter flock
-const ALIGN_W = 1.0;          // alignment weight (reduced)
+const ALIGN_W = 4.0;          // alignment weight (reduced)
 const COH_W   = 0.5;          // cohesion weight (reduced) 
 const SEP_W   = 1.5;          // separation weight
 const MAX_FORCE_BASE = 0.8;   // per–frame steering clamp (increased)
@@ -94,8 +94,8 @@ export default function BoidsCanvas({
         const dy = targetY - startY;
         const dist = Math.hypot(dx, dy);
         
-        const vx = (dx / dist) * (3 + Math.random() * 2) * currentSpeed;
-        const vy = (dy / dist) * (3 + Math.random() * 2) * currentSpeed;
+        const vx = (dx / dist) * (3 + Math.random() ) * currentSpeed;
+        const vy = (dy / dist) * (3 + Math.random() ) * currentSpeed;
 
         boids.push({ x: startX, y: startY, vx, vy });
       }
@@ -193,7 +193,8 @@ export default function BoidsCanvas({
 
       boids.forEach((b) => {
         // Only apply flocking behavior after fly-in is complete
-        if (flyInCompleteRef.current) {
+        // if (flyInCompleteRef.current) {
+                if (true) {
           let align = { x: 0, y: 0 },
             coh = { x: 0, y: 0 },
             sep = { x: 0, y: 0 };
