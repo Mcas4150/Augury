@@ -16,6 +16,8 @@ const door = "akasha";
   const [loading, setLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastUrlRef = useRef<string | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
 
   const clean = () => {
     audioRef.current?.pause();
@@ -37,12 +39,34 @@ const door = "akasha";
       const data = await res.json();
       const url = base64ToBlobUrl(data.audio_base64, data.mime || "audio/mpeg");
       lastUrlRef.current = url;
+
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      const audioContext = audioContextRef.current;
+
       if (!audioRef.current) {
         audioRef.current = new Audio();
+        audioRef.current.crossOrigin = "anonymous";
         if (onAudioFinish) {
           audioRef.current.onended = onAudioFinish;
         }
       }
+
+      if (!sourceRef.current) {
+        sourceRef.current = audioContext.createMediaElementSource(audioRef.current);
+        const convolver = audioContext.createConvolver();
+
+        // Fetch and decode the impulse response
+        const response = await fetch("/media/PS1_CHURCH.wav");
+        const arrayBuffer = await response.arrayBuffer();
+        const impulseBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        convolver.buffer = impulseBuffer;
+
+        sourceRef.current.connect(convolver);
+        convolver.connect(audioContext.destination);
+      }
+
       audioRef.current.src = url;
       await audioRef.current.play();
     } finally {
