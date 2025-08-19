@@ -81,7 +81,7 @@ const door = "akasha";
 
   return (
     <button disabled={loading || !favor || !door} onClick={run}
-      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg">
+      className="px-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white text-2xl rounded-lg">
       {loading ? "Inaugurating…" : "Inaugurate"}
     </button>
   );

@@ -91,7 +91,7 @@ const BoidsCanvas3: React.FC<BoidsCanvas3Props> = ({ onDirectionDetermined, show
   }, [initBoids]);
 
   const keepWithinBounds = useCallback((boid: Boid) => {
-    const margin = 200; // Margin from edges to start turning
+    const margin = -300; // Margin from edges to start turning
     const turnSpeed = 0.05; // How sharply boids turn
 
     if (boid.x < margin) boid.vx += turnSpeed;

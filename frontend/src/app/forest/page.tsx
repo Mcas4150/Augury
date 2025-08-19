@@ -48,7 +48,7 @@ const scrollContent = (
     </p>
 
     <div className="text-center mt-6">
-        <Link href="/game" className="font-roman text-xl text-black hover:underline font-bold">
+        <Link href="/game" className="font-roman text-2xl text-black hover:underline font-bold">
           Continue your journey 
         </Link>
     </div>

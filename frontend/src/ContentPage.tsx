@@ -40,7 +40,7 @@ export default function ContentPage({ imageSrc, altText, scrollContent, webSocke
           priority
         />
         <div className="absolute top-10 left-1/2 -translate-x-1/2">
-          <button onClick={() => setIsModalOpen(true)} className="font-roman text-lg border-2 border-white px-4 py-3 hover:bg-white/10">
+          <button onClick={() => setIsModalOpen(true)} className="px-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white text-2xl rounded-lg">
             look up at the sky
           </button>
         </div>

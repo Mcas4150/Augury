@@ -3,6 +3,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import BottomAugur from '@/BottomAugur';
 
 const GameComponent = ({onGameWon}) => {
   const canvasRef = useRef(null);
@@ -269,21 +270,8 @@ const GameComponent = ({onGameWon}) => {
   return (
     <div className="relative w-full h-full">
       <canvas id="gameCanvas" ref={canvasRef} className="w-full h-full"></canvas>
-      {/* {isGameWon && (
-        // <div
-          
-        //   className="absolute font-roman text-white hover:text-gray-300"
-        //   style={{
-        //     left: `${textProps.centerX}px`,
-        //     top: `${textProps.centerY}px`,
-        //     fontSize: `${textProps.fontSize}px`,
-        //     transform: 'translate(-50%, -50%)',
-        //     textAlign: 'center'
-        //   }}
-        // >
-        //   Take The Auspices
-        // </div>
-      )} */}
+  
+      <BottomAugur message='Connect the nodes to mark a quadrilateral templum in the sky'/>
     </div>
   );
 };

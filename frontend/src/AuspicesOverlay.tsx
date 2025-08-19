@@ -118,15 +118,15 @@ export default function AuspicesOverlay({ isGameWon, textProps }: AuspicesOverla
       )}
       {loading && (
         <div 
-          className="absolute z-20 font-roman text-white hover:text-gray-300 bg-transparent border-none p-0"
+          className="absolute z-20 font-roman text-white text-3xl hover:text-gray-300 bg-transparent border-none p-0"
         >"Augurating"</div>
       )}
 
       {(judgement || proclamation) && (
         <div className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 space-y-6">
-          {judgement && <div className="text-2xl font-roman text-white text-center">Judgement: <strong>{judgement}</strong></div>}
+          {judgement && <div className="text-3xl font-roman text-white text-center">Judgement: <strong>{judgement}</strong></div>}
 
-          <button onClick={handleClose} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg">Return to Forum</button>
+          <button onClick={handleClose} className="px-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white text-2xl rounded-lg">Return to Forum</button>
         </div>
       )}
 

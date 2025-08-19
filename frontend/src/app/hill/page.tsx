@@ -4,7 +4,7 @@ import Link from 'next/link';
 import ContentPage from '@/ContentPage';
 
 // Statically import the images
-import labyrinthosDiagram from '/public/media/labyrinthos.jpg';
+import labyrinthosDiagram from '/public/media/Triskeli.png';
 import lineBreak from '/public/media/linebreak.png';
 
 // Define the detailed scroll content
@@ -35,7 +35,7 @@ const scrollContent = (
       />
     </div>
 
-    <p className="mb-4">
+    <p className="mb-4 text-xl">
       Early computational intelligence relied on <strong>Expert Systems</strong> to structure knowledge as arborescent structures, navigated by following <code>IF-THEN</code> rulesets. These categories were brittle and manually encoded, relying on their programmers to decide what would be included, where, and how.
     </p>
 
@@ -54,7 +54,7 @@ const scrollContent = (
     </p>
 
     <div className="text-center mt-8 pt-4">
-        <Link href="/game3" className="font-roman text-xl text-black hover:underline font-bold">
+        <Link href="/game3" className="font-roman text-2xl text-black hover:underline font-bold">
           Continue your journey 
         </Link>
     </div>
