@@ -271,7 +271,7 @@ const GameComponent = ({onGameWon}) => {
     <div className="relative w-full h-full">
       <canvas id="gameCanvas" ref={canvasRef} className="w-full h-full"></canvas>
   
-      <BottomAugur message='Connect the nodes to mark a quadrilateral templum in the sky'/>
+      {/* <BottomAugur message='Connect the nodes to mark a quadrilateral templum in the sky'/> */}
     </div>
   );
 };

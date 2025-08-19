@@ -1,67 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import GameComponent from '@/GameComponent';
-import AuspicesOverlay from '@/AuspicesOverlay';
-import Image from 'next/image';
-import { useWebSocket } from '@/useWebSocket';
-
+import GamePageWrapper from "@/GamePageWrapper";
 
 export default function GamePage() {
-  const [isGameWon, setIsGameWon] = useState(false);
-  const [textProps, setTextProps] = useState({ centerX: 0, centerY: 0, fontSize: 0 });
-  const { send } = useWebSocket();
-  const effectRan = useRef(false);
-const [visitId] = useState(() => Date.now());
-
-useEffect(() => {
-  if (effectRan.current === false) {
-    send("forestGen"); // or "shoregen", "forestgen"
-
-    return () => {
-      effectRan.current = true;
-    };
-  }
-}, []);
-
-  interface GameTextProps {
-    centerX: number;
-    centerY: number;
-    fontSize: number;
-  }
-
-  const handleGameWon = (gameTextProps: GameTextProps) => {
-    setIsGameWon(true);
-    // Convert game canvas coordinates to page coordinates
-    const gameContainer = document.querySelector('.game-container');
-    if (gameContainer) {
-      const rect = gameContainer.getBoundingClientRect();
-      setTextProps({
-        centerX: rect.left + gameTextProps.centerX,
-        centerY: rect.top + gameTextProps.centerY,
-        fontSize: gameTextProps.fontSize
-      });
-    }
-  };
-
-  return (
-    <main className="relative w-full h-[85vh] flex items-center justify-center">
-      {/* Background Image - Layer 0 */}
-      <Image
-        src="/media/nightsky.png"
-        alt="A starry night sky"
-        layout="fill"
-        objectFit="cover"
-        quality={100}
-      />
-
-      {/* Game Component Container - Layer 10 */}
-      <div className="relative z-10 w-[960px] h-[540px] game-container">
-        <GameComponent onGameWon={handleGameWon} />
-      </div>
-
-      {/* Auspices Overlay */}
-      <AuspicesOverlay isGameWon={isGameWon} textProps={textProps} />
-    </main>
-  );
+  return <GamePageWrapper imageSrc="/media/nightsky.png" genEvent="forestGen" />;
 }

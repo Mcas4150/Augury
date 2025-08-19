@@ -2,8 +2,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import BoidsCanvas3 from "./BoidsCanvas3";
 import { useWebSocket } from "./useWebSocket";
-import { useRouter } from "next/navigation";
-
 
 function base64ToBlobUrl(b64: string, mime = "audio/mpeg") {
   const bin = atob(b64);
@@ -19,9 +17,16 @@ interface AuspicesOverlayProps {
     centerY: number;
     fontSize: number;
   };
+  onResult?: (res: { judgement?: string | null; proclamation?: string | null }) => void;
+  setCleanupFn?: (fn: () => void) => void;
 }
 
-export default function AuspicesOverlay({ isGameWon, textProps }: AuspicesOverlayProps) {
+export default function AuspicesOverlay({
+  isGameWon,
+  textProps,
+  onResult,
+  setCleanupFn,
+}: AuspicesOverlayProps) {
   const [proclamation, setProclamation] = useState("");
   const [judgement, setJudgement] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -33,7 +38,6 @@ export default function AuspicesOverlay({ isGameWon, textProps }: AuspicesOverla
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastUrlRef = useRef<string | null>(null);
   const { send } = useWebSocket();
-  const router = useRouter();
 
   const stopAndCleanupAudio = () => {
     audioRef.current?.pause();
@@ -44,8 +48,15 @@ export default function AuspicesOverlay({ isGameWon, textProps }: AuspicesOverla
     if (audioRef.current) audioRef.current.src = "";
   };
 
+  // expose cleanup fn to parent so parent can call it before navigation/unmount
+  useEffect(() => {
+    setCleanupFn?.(stopAndCleanupAudio);
+    return () => {
+      setCleanupFn?.(() => {});
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleTakeAuspices = async () => {
-    // send("forumGen");
     send("divinate");
 
     setLoading(true);
@@ -67,6 +78,9 @@ export default function AuspicesOverlay({ isGameWon, textProps }: AuspicesOverla
 
       setProclamation(data.proclamation);
       setJudgement(data.judgement);
+
+      // notify parent of results
+      onResult?.({ judgement: data.judgement, proclamation: data.proclamation });
 
       const mime = data.mime || "audio/mpeg";
       const url = base64ToBlobUrl(data.audio_base64, mime);
@@ -90,18 +104,11 @@ export default function AuspicesOverlay({ isGameWon, textProps }: AuspicesOverla
     } catch (err) {
       console.error(err);
       setProclamation("⚠️ Error invoking the augur.");
+      onResult?.({ judgement: null, proclamation: "⚠️ Error invoking the augur." });
     } finally {
       setShowBoids(true);
       setLoading(false);
     }
-  };
-
-  const handleClose = () => {
-    stopAndCleanupAudio();
-    setProclamation("");
-    setJudgement(null);
-    setShowBoids(false);
-    router.push('/forum');
   };
 
   return (
@@ -117,27 +124,15 @@ export default function AuspicesOverlay({ isGameWon, textProps }: AuspicesOverla
         </button>
       )}
       {loading && (
-        <div 
+        <div
           className="absolute z-20 font-roman text-white text-3xl hover:text-gray-300 bg-transparent border-none p-0"
-        >"Augurating"</div>
-      )}
-
-      {(judgement || proclamation) && (
-        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 space-y-6">
-          {judgement && <div className="text-3xl font-roman text-white text-center">Judgement: <strong>{judgement}</strong></div>}
-
-          <button onClick={handleClose} className="px-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white text-2xl rounded-lg">Return to Forum</button>
+        >
+          "Augurating"
         </div>
       )}
 
       {showBoids && (
         <div className="absolute inset-0 z-40 w-full h-full pointer-events-none">
-               {/* <BoidsCanvas
-            trigger={boidTrigger}
-            isConsulting={loading}
-            flyInOnStart
-            onDirectionDetermined={setFlyInDirection}
-          /> */}
           <BoidsCanvas3 onDirectionDetermined={setFlyInDirection} />
         </div>
       )}
