@@ -10,6 +10,7 @@ export default function ForumPage() {
   const effectRan = useRef(false);
   const [imageKey] = useState(Date.now());
   const [isAudioFinished, setIsAudioFinished] = useState(false);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
   useEffect(() => {
     if (effectRan.current === false) {
@@ -34,17 +35,22 @@ export default function ForumPage() {
         priority
         unoptimized
       />
-      <div className="absolute top-10 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-4">
-        {isAudioFinished ? (
-          <Link href="/" className="px-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white text-2xl rounded-lg">
-            Return to Main
-          </Link>
-        ) : (
-          <InaugurateButton onAudioFinish={() => setIsAudioFinished(true)} />
-        )}
+      <div className="fixed bottom-0 left-0 w-full flex justify-center items-end pointer-events-none z-50">
+        <div className="pointer-events-auto w-full bg-black py-4 flex justify-center">
+          {isAudioFinished ? (
+            <Link href="/" className="px-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white text-2xl rounded-lg">
+              Return to Main
+            </Link>
+          ) : isAudioPlaying ? null : (
+            <InaugurateButton
+              onAudioStart={() => setIsAudioPlaying(true)}
+              onAudioFinish={() => { setIsAudioFinished(true); setIsAudioPlaying(false); }}
+            />
+          )}
+        </div>
       </div>
       {/* Game Component Container - Layer 10 */}
-     
+      
     </main>
 </>
 )}

@@ -9,7 +9,7 @@ function base64ToBlobUrl(b64: string, mime = "audio/mpeg") {
   return URL.createObjectURL(new Blob([bytes], { type: mime }));
 }
 
-export default function InaugurateButton({ auto, onAudioFinish }: { auto?: boolean; onAudioFinish?: () => void }) {
+export default function InaugurateButton({ auto, onAudioFinish, onAudioStart }: { auto?: boolean; onAudioFinish?: () => void; onAudioStart?: () => void }) {
 //   const { favor, door } = useAuspices();
 const favor = "favourable";
 const door = "akasha";
@@ -68,6 +68,8 @@ const door = "akasha";
       }
 
       audioRef.current.src = url;
+      // notify parent that playback is starting so it can hide the button
+      onAudioStart?.();
       await audioRef.current.play();
     } finally {
       setLoading(false);
