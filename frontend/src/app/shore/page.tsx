@@ -1,16 +1,13 @@
 "use client";
-import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import Link from 'next/link'; // Import the Link component
-import Modal from '@/Modal';
-import ScrollComponent from '@/ScrollComponent';
-import { useWebSocket } from '@/useWebSocket';
+import Link from 'next/link';
+import ContentPage from '@/ContentPage';
 
 // Statically import the images
 import boidsDiagram from '/public/media/boidsdiagram.gif';
 import lineBreak from '/public/media/linebreak.png';
 
-// Define the detailed scroll content, now including the "Continue" link at the bottom
+// Define the detailed scroll content
 const scrollContent = (
   <div>
     <div className="flex justify-center mb-4">
@@ -56,7 +53,6 @@ const scrollContent = (
       In contrast, AI diffusion models mark a shift from explicit rules to probabilistic learning. When prompted to create a "bird," a diffusion model doesn't follow a program; it navigates a possibility space to synthesize a novel image. This act of interpolation echoes the human interpretations of nature preceding its simulation.
     </p>
 
-    {/* Manually add the "Continue" link, matching the ForestPage example */}
     <div className="text-center mt-8 pt-4">
         <Link href="/game2" className="font-roman text-xl text-black hover:underline font-bold">
           Continue your journey 
@@ -66,46 +62,12 @@ const scrollContent = (
 );
 
 export default function ShorePage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const { send } = useWebSocket();
-    const effectRan = useRef(false);
-  const [imageKey] = useState(Date.now());
-useEffect(() => {
-  if (effectRan.current === false) {
-    send("shore"); // or "shoregen", "forestgen"
-
-    return () => {
-      effectRan.current = true;
-    };
-  }
-}, []);
-  const scrollText = `Waves crash upon the shore, echoing forgotten words.`;
-
   return (
-    <>
-      <main className="relative w-screen h-screen">
-        <Image
-          src={`/comfyui/Shore1.png?t=${imageKey}`}
-          alt="A rocky shore"
-          fill
-          style={{ objectFit: 'cover' }}
-          quality={100}
-          priority
-        />
-        <div className="absolute top-10 left-1/2 -translate-x-1/2">
-          <button onClick={() => setIsModalOpen(true)} className="font-roman text-lg border-2 border-white px-4 py-3 hover:bg-white/10">
-            look up at the sky
-          </button>
-        </div>
-      </main>
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <div className="w-full h-[80vh]">
-          {/* The continueLink prop is removed, as the link is now inside scrollContent */}
-          <ScrollComponent>
-            {scrollContent}
-          </ScrollComponent>
-        </div>
-      </Modal>
-    </>
+    <ContentPage
+      imageSrc="Shore1.png"
+      altText="A rocky shore"
+      scrollContent={scrollContent}
+      webSocketMessage="shore"
+    />
   );
 }

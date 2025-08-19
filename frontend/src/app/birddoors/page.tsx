@@ -41,7 +41,7 @@ export default function BirdDoorsPage() {
 
   const middleScrollContent = (
     <div>
-      <p>Towards Imitation of Life</p>
+      <p className="text-2xl font-bold">Towards Imitation of Life</p>
       <div className="flex justify-center my-4">
         <Image src="/media/swarm2.png" alt="Swarm 2" width={300} height={200} />
       </div>

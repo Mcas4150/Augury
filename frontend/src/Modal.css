@@ -1,0 +1,6 @@
+.modal-h1 {
+  font-size: 2rem; /* Increase font size */
+  font-weight: bold; /* Make text bold */
+  text-align: center; /* Center the text */
+  margin-bottom: 1rem; /* Add some space below the header */
+}

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Modal from '@/Modal';
 import ScrollComponent from '@/ScrollComponent';
 import { useWebSocket } from '@/useWebSocket';
+import './../Modal.css';
 
 export default function BirdDoorsPage() {
   const [isLeftModalOpen, setIsLeftModalOpen] = useState(false);
@@ -27,7 +28,7 @@ export default function BirdDoorsPage() {
 
   const leftScrollContent = (
     <div>
-      <p>Towards Attunement</p>
+      <h1 className="modal-h1">Towards Attunement</h1>
       <div className="flex justify-center my-4">
         <Image src="/media/swarm1.png" alt="Swarm 1" width={300} height={200} />
       </div>
@@ -41,7 +42,7 @@ export default function BirdDoorsPage() {
 
   const middleScrollContent = (
     <div>
-      <p>Towards Imitation of Life</p>
+      <h1 className="modal-h1">Towards Imitation of Life</h1>
       <div className="flex justify-center my-4">
         <Image src="/media/swarm2.png" alt="Swarm 2" width={300} height={200} />
       </div>
@@ -55,7 +56,7 @@ export default function BirdDoorsPage() {
 
   const rightScrollContent = (
     <div>
-      <p>Towards Akasha</p>
+      <h1 className="modal-h1">Towards Akasha</h1>
       <div className="flex justify-center my-4">
         <Image src="/media/swarm3.png" alt="Swarm 3" width={300} height={200} />
       </div>

@@ -1,10 +1,7 @@
 "use client";
-import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import Modal from '@/Modal';
-import ScrollComponent from '@/ScrollComponent';
-import { useWebSocket } from '@/useWebSocket';
+import ContentPage from '@/ContentPage';
 
 // Statically import the images
 import labyrinthosDiagram from '/public/media/labyrinthos.jpg';
@@ -56,7 +53,6 @@ const scrollContent = (
       By contrast, Large Language Models propose emergent taxonomies. Instead of a predefined decision tree, concepts rely on the <strong>statistical proximity</strong> of objects in their training data. Categories are probabilistic clusters of relative meaning, highlighting the inherent biases of that data.
     </p>
 
-    {/* Manually add the "Continue" link */}
     <div className="text-center mt-8 pt-4">
         <Link href="/game3" className="font-roman text-xl text-black hover:underline font-bold">
           Continue your journey 
@@ -66,46 +62,12 @@ const scrollContent = (
 );
 
 export default function HillPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const { send } = useWebSocket();
-    const effectRan = useRef(false);
-  const [imageKey] = useState(Date.now());
-
-  useEffect(() => {
-    if (effectRan.current === false) {
-      send("hill"); // or "shoregen", "forestgen"
-
-      return () => {
-        effectRan.current = true;
-      };
-    }
-  }, []);
-  const scrollText = `From this vantage point, the shape of the world seems clear.`;
-
   return (
-    <>
-      <main className="relative w-screen h-screen">
-        <Image
-          src={`/comfyui/Hill1.png?t=${imageKey}`}
-          alt="A windswept hill"
-          fill
-          style={{ objectFit: 'cover' }}
-          quality={100}
-          priority
-        />
-        <div className="absolute top-10 left-1/2 -translate-x-1/2">
-          <button onClick={() => setIsModalOpen(true)} className="font-roman text-lg border-2 border-white px-4 py-3 hover:bg-white/10">
-            look up at the sky
-          </button>
-        </div>
-      </main>
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <div className="w-full h-[80vh]">
-          <ScrollComponent>
-            {scrollContent}
-          </ScrollComponent>
-        </div>
-      </Modal>
-    </>
+    <ContentPage
+      imageSrc="Hill1.png"
+      altText="A windswept hill"
+      scrollContent={scrollContent}
+      webSocketMessage="hill"
+    />
   );
 }
