@@ -68,12 +68,9 @@ export default function BirdDoorsPage() {
     <div>
       <h1 className="modal-h1">Towards Attunement</h1>
       <div className="flex justify-center my-4">
-        <Image src="/media/swarm1.png" alt="Swarm 1" width={300} height={200} />
-      </div>
-      <div className="text-center mt-6">
-        <Link href="/forest" className="font-roman text-2xl text-black hover:underline font-bold">
-          Continue your journey 
-        </Link>
+         <Link href="/forest" className="font-roman text-2xl text-black hover:underline font-bold">
+        
+        <Image src="/media/swarm1.png" alt="Swarm 1" width={300} height={200} /></Link>
       </div>
     </div>
   );
@@ -82,13 +79,9 @@ export default function BirdDoorsPage() {
     <div>
       <h1 className="modal-h1">Towards Imitation of Life</h1>
       <div className="flex justify-center my-4">
-        <Image src="/media/swarm2.png" alt="Swarm 2" width={300} height={200} />
-      </div>
-      <div className="text-center mt-6">
-        <Link href="/shore" className="font-roman text-2xl text-black hover:underline font-bold">
-          Continue your journey 
-        </Link>
-      </div>
+         <Link href="/shore" className="font-roman text-2xl text-black hover:underline font-bold"><Image src="/media/swarm2.png" alt="Swarm 2" width={300} height={200} />
+          </Link></div>
+ 
     </div>
   );
 
@@ -96,11 +89,8 @@ export default function BirdDoorsPage() {
     <div>
       <h1 className="modal-h1">Towards Akasha</h1>
       <div className="flex justify-center my-4">
+         <Link href="/hill" className="font-roman text-2xl text-black hover:underline font-bold">
         <Image src="/media/swarm3.png" alt="Swarm 3" width={300} height={200} />
-      </div>
-      <div className="text-center mt-6">
-        <Link href="/hill" className="font-roman text-2xl text-black hover:underline font-bold">
-          Continue your journey 
         </Link>
       </div>
     </div>

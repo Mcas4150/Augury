@@ -6,15 +6,17 @@ import ContentPage from '@/ContentPage';
 const scrollContent = (
   <div>
     <div className="flex justify-center mb-4">
+       <Link href="/game" className="font-roman text-2xl text-black hover:underline font-bold">
+         
       <Image
-        src="/media/niche.jpg"
+        src="/media/Temple.png"
         alt="A visual representation of the Acoustic Niche Hypothesis"
         width={400}
         height={300}
         className="rounded-md"
-      />
+      /></Link>
     </div>
-
+{/* 
     <p className="mb-2 font-bold text-xl mx-6">
       The Acoustic Niche Hypothesis (Krause, 1993), proposes an autopoetic soundscape where species evolve to emit and perceive sonic signals in unique spectral niches. Human hearing is also described by this model, suggesting the tandem evolution of the biological structures for both hearing and vocal production.
     </p>
@@ -51,7 +53,7 @@ const scrollContent = (
         <Link href="/game" className="font-roman text-2xl text-black hover:underline font-bold">
           Continue your journey 
         </Link>
-    </div>
+    </div> */}
   </div>
 );
 

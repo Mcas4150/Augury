@@ -4,13 +4,15 @@ import Link from 'next/link';
 import ContentPage from '@/ContentPage';
 
 // Statically import the images
-import boidsDiagram from '/public/media/boidsdiagram.gif';
+import boidsDiagram from '/public/media/Boid.png';
 import lineBreak from '/public/media/linebreak.png';
 
 // Define the detailed scroll content
 const scrollContent = (
   <div>
     <div className="flex justify-center mb-4">
+         <Link href="/game2" className="font-roman text-2xl text-black hover:underline font-bold">
+         
       <Image
         src={boidsDiagram}
         alt="A diagram illustrating the Boids algorithm"
@@ -19,8 +21,9 @@ const scrollContent = (
         className="rounded-md"
         priority
       />
+      </Link>
     </div>
-
+{/* 
     <p className="mb-4 text-xl">
       Early artificial life, from ethological algorithms to fractal art, emerged from simplified interpretations of natural systems. This abstraction sought to model and simulate life by isolating the core rules governing its behavior, translating complexity into logic.
     </p>
@@ -57,7 +60,7 @@ const scrollContent = (
         <Link href="/game2" className="font-roman text-2xl text-black hover:underline font-bold">
           Continue your journey 
         </Link>
-    </div>
+    </div> */}
   </div>
 );
 

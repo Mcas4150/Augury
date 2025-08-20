@@ -4,13 +4,16 @@ import Link from 'next/link';
 import ContentPage from '@/ContentPage';
 
 // Statically import the images
-import labyrinthosDiagram from '/public/media/Triskeli.png';
+import labyrinthosDiagram from '/public/media/Triskelia.png';
 import lineBreak from '/public/media/linebreak.png';
 
 // Define the detailed scroll content
 const scrollContent = (
   <div>
     <div className="flex justify-center mb-4">
+       <Link href="/game3" className="font-roman text-2xl text-black hover:underline font-bold">
+     
+       
       <Image
         src={labyrinthosDiagram}
         alt="A classical labyrinth diagram"
@@ -19,8 +22,9 @@ const scrollContent = (
         className="rounded-md"
         priority
       />
+       </Link>
     </div>
-
+{/* 
     <p className="mb-4">
       Categorisation imposes order on the world, assigning labels and creating relationships between disparate pieces of information to structure complexity. This process is revealing of human bias, in the inclusion and structuring of archives.
     </p>
@@ -57,7 +61,7 @@ const scrollContent = (
         <Link href="/game3" className="font-roman text-2xl text-black hover:underline font-bold">
           Continue your journey 
         </Link>
-    </div>
+    </div> */}
   </div>
 );
 
