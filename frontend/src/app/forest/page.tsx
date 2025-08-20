@@ -15,7 +15,7 @@ const scrollContent = (
       />
     </div>
 
-    <p className="mb-4">
+    <p className="mb-2 font-bold text-xl mx-6">
       The Acoustic Niche Hypothesis (Krause, 1993), proposes an autopoetic soundscape where species evolve to emit and perceive sonic signals in unique spectral niches. Human hearing is also described by this model, suggesting the tandem evolution of the biological structures for both hearing and vocal production.
     </p>
     
@@ -29,7 +29,7 @@ const scrollContent = (
       />
     </div>
 
-    <p className="mb-4">
+    <p className="mb-2 font-bold text-xl mx-6">
       Decoding these complex communication networks has so far relied on a synthesis of ear training and technical expertises; situated listening, field recording, visual analysis of spectrograms, audio processing... Critically, the computer's role was one of translation not interpretation.
     </p>
 
@@ -43,7 +43,7 @@ const scrollContent = (
       />
     </div>
 
-    <p>
+    <p className='mb-2 font-bold text-xl mx-6'>
       The emergence of machine listening via neural networks like BirdNET marks a fundamental shift, automating the interpretive act itself, yielding probabilistic divinations in place of human experts.
     </p>
 

@@ -3,6 +3,7 @@ import { Cinzel } from "next/font/google";
 import "./globals.css";
 import Link from 'next/link';
 import { WebSocketProvider } from "@/contexts/WebSocketContext";
+import { AuspicesProvider } from "@/contexts/AuspicesProvider";
 
 const cinzel = Cinzel({
   weight: ["400", "700"],
@@ -23,11 +24,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <WebSocketProvider>
-        <body className={`${cinzel.variable} antialiased bg-black text-white`}>
-          <main>
-            {children}
-          </main>
-        </body>
+        <AuspicesProvider>
+          <body className={`${cinzel.variable} antialiased bg-black text-white`}>
+            <main>
+              {children}
+            </main>
+          </body>
+        </AuspicesProvider>
       </WebSocketProvider>
     </html>
   );

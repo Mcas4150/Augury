@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useWebSocket } from "@/useWebSocket";
 import BottomAugur from "@/BottomAugur";
 import { useRouter } from "next/navigation";
+import { useAuspices } from "@/contexts/AuspicesProvider";
 
 interface GamePageWrapperProps {
   imageSrc: string;
@@ -38,6 +39,9 @@ export default function GamePageWrapper({ imageSrc, genEvent }: GamePageWrapperP
   const [proclamation, setProclamation] = useState<string | null>(null);
   const [cleanupFn, setCleanupFn] = useState<() => void>(() => () => {});
   const router = useRouter();
+
+  // Auspices context — persist the favour/judgement for use by the Inaugurate flow
+  const { setFavor, setJudgement: setGlobalJudgement } = useAuspices();
 
   const handleClose = () => {
     // ensure AuspicesOverlay cleanup (stop audio) runs before navigation
@@ -103,8 +107,16 @@ export default function GamePageWrapper({ imageSrc, genEvent }: GamePageWrapperP
         isGameWon={isGameWon}
         textProps={textProps}
         onResult={({ judgement, proclamation }) => {
+          // local UI state
           setJudgement(judgement ?? null);
           setProclamation(proclamation ?? null);
+          // also persist to global AuspicesProvider for use by the InaugurateButton
+          setGlobalJudgement(judgement ?? null);
+          // Normalize judgement -> favor for backend ("good"/"bad")
+          const favor = (judgement === "favorable" || judgement === "favourable") ? "good"
+                      : (judgement === "unfavorable" || judgement === "unfavourable") ? "bad"
+                      : null;
+          setFavor(favor);
         }}
         setCleanupFn={setCleanupFn}
       />

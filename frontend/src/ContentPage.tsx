@@ -18,6 +18,9 @@ export default function ContentPage({ imageSrc, altText, scrollContent, webSocke
   const effectRan = useRef(false);
   const [imageKey] = useState(Date.now());
 
+  // New: control showing the button after a delay without shifting layout (fade-in)
+  const [showButton, setShowButton] = useState(false);
+
   useEffect(() => {
     if (effectRan.current === false) {
       send(webSocketMessage);
@@ -27,6 +30,13 @@ export default function ContentPage({ imageSrc, altText, scrollContent, webSocke
       };
     }
   }, [webSocketMessage, send]);
+
+  useEffect(() => {
+    // Start the 8s timer on mount. It will restart each time the component mounts.
+    setShowButton(false);
+    const t = setTimeout(() => setShowButton(true), 8000);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <>
@@ -40,7 +50,13 @@ export default function ContentPage({ imageSrc, altText, scrollContent, webSocke
           priority
         />
         <div className="absolute top-10 left-1/2 -translate-x-1/2">
-          <button onClick={() => setIsModalOpen(true)} className="px-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white text-2xl rounded-lg">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className={`px-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white text-2xl rounded-lg transition-opacity duration-500 transform ${
+              showButton ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-2 pointer-events-none'
+            }`}
+            aria-hidden={!showButton}
+          >
             look up at the sky
           </button>
         </div>

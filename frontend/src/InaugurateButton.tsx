@@ -1,7 +1,7 @@
 // ── InaugurateButton.tsx ──────────────────────────────────────────────────
 "use client";
 import React, { useRef, useState } from "react";
-// import { useAuspices } from "@/auspices/AuspicesProvider";
+import { useAuspices } from "@/contexts/AuspicesProvider";
 
 function base64ToBlobUrl(b64: string, mime = "audio/mpeg") {
   const bin = atob(b64); const bytes = new Uint8Array(bin.length);
@@ -9,10 +9,17 @@ function base64ToBlobUrl(b64: string, mime = "audio/mpeg") {
   return URL.createObjectURL(new Blob([bytes], { type: mime }));
 }
 
-export default function InaugurateButton({ auto, onAudioFinish, onAudioStart }: { auto?: boolean; onAudioFinish?: () => void; onAudioStart?: () => void }) {
-//   const { favor, door } = useAuspices();
-const favor = "favourable";
-const door = "akasha";
+export default function InaugurateButton({ auto, onAudioFinish, onAudioStart, onResponse }: { auto?: boolean; onAudioFinish?: () => void; onAudioStart?: () => void; onResponse?: (res: any) => void }) {
+  const { favor, door } = useAuspices();
+  // Normalize favor into backend-expected values ("good" | "bad").
+  const normalizeFavor = (f: string | null | undefined): string | null => {
+    if (!f) return null;
+    const s = String(f).toLowerCase();
+    if (s === "good" || s === "bad") return s;
+    if (s.includes("fav") || s.includes("good") || s.includes("faus") || s.includes("favour") || s.includes("favorable") || s.includes("favourable")) return "good";
+    if (s.includes("unfav") || s.includes("bad") || s.includes("unfavour") || s.includes("unfavorable") || s.includes("unfavourable")) return "bad";
+    return null;
+  };
   const [loading, setLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastUrlRef = useRef<string | null>(null);
@@ -30,15 +37,23 @@ const door = "akasha";
     if (!favor || !door) return;
     setLoading(true); clean();
     try {
+      const normalizedFavor = normalizeFavor(favor);
       const res = await fetch("http://localhost:8000/inaugurate/audio", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ favor, door }),
+        body: JSON.stringify({ favor: normalizedFavor, door }),
       });
       if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
       const data = await res.json();
       const url = base64ToBlobUrl(data.audio_base64, data.mime || "audio/mpeg");
       lastUrlRef.current = url;
+
+      // Emit raw API response to parent so the forum page can compute/display the label in the footer.
+      try {
+        if (typeof onResponse === "function") onResponse(data);
+      } catch (e) {
+        // Non-fatal: if the parent handler fails, don't block audio playback.
+      }
 
       if (!audioContextRef.current) {
         audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();

@@ -6,6 +6,7 @@ import Modal from '@/Modal';
 import ScrollComponent from '@/ScrollComponent';
 import { useWebSocket } from '@/useWebSocket';
 import BottomAugur from '@/BottomAugur';
+import { useAuspices } from '@/contexts/AuspicesProvider';
 import './../Modal.css';
 
 export default function BirdDoorsPage() {
@@ -13,9 +14,21 @@ export default function BirdDoorsPage() {
   const [isMiddleModalOpen, setIsMiddleModalOpen] = useState(false);
   const [isRightModalOpen, setIsRightModalOpen] = useState(false);
   const [imageKey] = useState(Date.now());
-    const effectRan = useRef(false);
+      const effectRan = useRef(false);
       const { send } = useWebSocket();
+      const { setDoor } = useAuspices();
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [harpSrc, setHarpSrc] = useState(() => {
+    try {
+      // read previous index from localStorage and toggle it
+      const prev = localStorage.getItem("augur_harp_index");
+      const next = prev === "1" ? "0" : "1";
+      localStorage.setItem("augur_harp_index", next);
+      return next === "1" ? "/media/AugursHarp2.mp3" : "/media/AugursHarp.mp3";
+    } catch (e) {
+      return "/media/AugursHarp.mp3";
+    }
+  });
 
   useEffect(() => {
     if (effectRan.current === false) {
@@ -96,7 +109,7 @@ export default function BirdDoorsPage() {
   return (
     <>
       {/* audio element placed in the document so it can be controlled via ref */}
-      <audio ref={audioRef} src="/media/AugursHarp.mp3" loop />
+      <audio ref={audioRef} src={harpSrc} loop />
       <main className="relative w-screen h-screen">
         <Image
           src={`/comfyui/Doorway.png?t=${imageKey}`}
@@ -108,19 +121,19 @@ export default function BirdDoorsPage() {
         />
 
         <button
-          onClick={() => setIsLeftModalOpen(true)}
+          onClick={() => { setIsLeftModalOpen(true); setDoor("attunement"); }}
           title="Open Left Scroll"
           className="absolute hover:cursor-pointer"
           style={{ top: '50%', left: '18%', width: '13%', height: '30%' }}
         />
         <button
-          onClick={() => setIsMiddleModalOpen(true)}
+          onClick={() => { setIsMiddleModalOpen(true); setDoor("imitation"); }}
           title="Open Middle Scroll"
           className="absolute hover:cursor-pointer"
           style={{ top: '50%', left: '44%', width: '13%', height: '30%' }}
         />
         <button
-          onClick={() => setIsRightModalOpen(true)}
+          onClick={() => { setIsRightModalOpen(true); setDoor("akasha"); }}
           title="Open Right Scroll"
           className="absolute hover:cursor-pointer"
           style={{ top: '50%', left: '68%', width: '13%', height: '30%' }}

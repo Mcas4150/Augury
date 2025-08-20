@@ -65,7 +65,7 @@ def resolve_input_device() -> int:
     if settings.DEV is not None:
         return settings.DEV
     try:
-        return find_device("In 1-2 (MOTU", host_key="WASAPI")
+        return find_device("CABLE Output (VB-Audio Virtual Cable)", host_key="WASAPI")
     except Exception:
         return sd.default.device[0]
 
