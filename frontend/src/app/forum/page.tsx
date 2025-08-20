@@ -55,10 +55,10 @@ export default function ForumPage() {
                 Return to Main
               </Link>
             ) : isAudioPlaying ? (
-              <div className="px-6 py-4 text-white text-2xl italic">{inaugLabel ?? ""}</div>
+              <div className="px-6 py-4 text-white text-4xl italic">{inaugLabel ?? ""}</div>
             ) : (
               <InaugurateButton
-                onAudioStart={() => { setIsAudioPlaying(true); setInaugLabel(null); }}
+                onAudioStart={() => { setIsAudioPlaying(true); }}
                 onAudioFinish={() => { setIsAudioFinished(true); setIsAudioPlaying(false); setInaugLabel(null); }}
                 onResponse={(data) => {
                   const LABEL_MAP: Record<string, Record<string, string>> = {
@@ -67,11 +67,19 @@ export default function ForumPage() {
                     akasha:      { favorable: "Rhizome",           unfavorable: "Arborescence" },
                   };
                   try {
-                    const door = data?.door;
-                    const judgement = data?.judgement; // "favorable" | "unfavorable"
-                    const lbl = (door && judgement && LABEL_MAP[door]?.[judgement]) ? LABEL_MAP[door][judgement] : null;
+                    console.log("[ForumPage] inaugurate response:", data, "providerDoor:", door);
+                    // prefer door from API response but fall back to the global AuspicesProvider door
+                    const respDoor = data?.door ?? door;
+                    const rawJudgement = data?.judgement ?? "";
+                    const sj = String(rawJudgement).toLowerCase();
+                    const normJudgement = sj.startsWith("fav") ? "favorable"
+                                          : sj.startsWith("unfav") ? "unfavorable"
+                                          : rawJudgement;
+                    const lbl = (respDoor && normJudgement && LABEL_MAP[respDoor]?.[normJudgement]) ? LABEL_MAP[respDoor][normJudgement] : null;
+                    console.log("[ForumPage] resolved label:", { respDoor, rawJudgement, normJudgement, lbl });
                     setInaugLabel(lbl);
                   } catch (e) {
+                    console.error(e);
                     setInaugLabel(null);
                   }
                 }}
