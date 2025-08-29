@@ -76,15 +76,16 @@ async def proclaim_audio(proclaim_in: ProclaimIn):
 @router.post("/inaugurate/audio", response_model=AudioResponse)
 async def inaugurate_audio(facts: OmenIn | None = Body(None)):
 
-    favor = (facts.favor if facts else None) or random.choice(["good", "bad"])
+    favor = (facts.favor if facts else None) or random.choice(["favourable", "unfavourable"])
     data = {"favor": favor, "door": facts.door}
 
-    if settings.TEMP_RANDOM_OMEN:
-        judgement = random.choice(["favorable", "unfavorable"])
-    else:
-        judgement = inaugurate_omen(data)["omen"]
-    # expose the chosen judgement into the prompt facts so the LLM sees the same omen
-    data["omen"] = judgement
+    # if settings.TEMP_RANDOM_OMEN:
+    #     judgement = random.choice(["favorable", "unfavorable"])
+    # else:
+    #     judgement = inaugurate_omen(data)["omen"]
+    # # expose the chosen judgement into the prompt facts so the LLM sees the same omen
+    # data["omen"] = judgement
+    
     text = inaugurate(data)
 
     try:
@@ -95,4 +96,4 @@ async def inaugurate_audio(facts: OmenIn | None = Body(None)):
         raise HTTPException(status_code=502, detail=f"TTS failed — {e}")
 
     b64 = base64.b64encode(audio_bytes).decode("ascii")
-    return {"proclamation": text, "judgement": judgement, "audio_base64": b64}
+    return {"proclamation": text, "judgement": favor, "audio_base64": b64}

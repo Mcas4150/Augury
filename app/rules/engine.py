@@ -85,8 +85,8 @@ def inaugurate_omen(fact: dict) -> dict:
         "favor": favor,
         "context": {
             "title": door_node.get("title"),
-            "good": door_node.get("good"),
-            "bad":  door_node.get("bad"),
+            "favourable": door_node.get("favourable"),
+            "unfavourable":  door_node.get("unfavourable"),
             "primer": door_node.get("primer"),  # optional, see YAML below
         },
         "logic": logic,

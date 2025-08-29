@@ -8,7 +8,7 @@ export function WebSocketProvider({ children }) {
   const ws = useRef(null);
 
   useEffect(() => {
-    ws.current = new WebSocket("ws://10.0.0.232:9987");
+    ws.current = new WebSocket("ws://127.0.0.1:9987");
     
     ws.current.onopen = () => console.log('WS connected');
     ws.current.onmessage = (e) => console.log('WS message:', e.data);

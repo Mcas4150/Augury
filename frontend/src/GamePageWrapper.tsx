@@ -113,8 +113,8 @@ export default function GamePageWrapper({ imageSrc, genEvent }: GamePageWrapperP
           // also persist to global AuspicesProvider for use by the InaugurateButton
           setGlobalJudgement(judgement ?? null);
           // Normalize judgement -> favor for backend ("good"/"bad")
-          const favor = (judgement === "favorable" || judgement === "favourable") ? "good"
-                      : (judgement === "unfavorable" || judgement === "unfavourable") ? "bad"
+          const favor = (judgement === "favorable" || judgement === "favourable") ? "favourable"
+                      : (judgement === "unfavorable" || judgement === "unfavourable") ? "unfavourable"
                       : null;
           setFavor(favor);
         }}

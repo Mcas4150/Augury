@@ -15,9 +15,9 @@ export default function InaugurateButton({ auto, onAudioFinish, onAudioStart, on
   const normalizeFavor = (f: string | null | undefined): string | null => {
     if (!f) return null;
     const s = String(f).toLowerCase();
-    if (s === "good" || s === "bad") return s;
-    if (s.includes("fav") || s.includes("good") || s.includes("faus") || s.includes("favour") || s.includes("favorable") || s.includes("favourable")) return "good";
-    if (s.includes("unfav") || s.includes("bad") || s.includes("unfavour") || s.includes("unfavorable") || s.includes("unfavourable")) return "bad";
+    if (s === "favourable" || s === "unfavourable") return s;
+    if (s.includes("fav") || s.includes("good") || s.includes("faus") || s.includes("favour") || s.includes("favorable") || s.includes("favourable")) return "favourable";
+    if (s.includes("unfav") || s.includes("bad") || s.includes("unfavour") || s.includes("unfavorable") || s.includes("unfavourable")) return "unfavourable";
     return null;
   };
   const [loading, setLoading] = useState(false);
