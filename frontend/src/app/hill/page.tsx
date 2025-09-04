@@ -1,18 +1,19 @@
 "use client";
-import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import Modal from '@/Modal';
-import ScrollComponent from '@/ScrollComponent';
+import ContentPage from '@/ContentPage';
 
 // Statically import the images
-import labyrinthosDiagram from '/public/media/labyrinthos.jpg';
+import labyrinthosDiagram from '/public/media/Triskelia.png';
 import lineBreak from '/public/media/linebreak.png';
 
 // Define the detailed scroll content
 const scrollContent = (
   <div>
     <div className="flex justify-center mb-4">
+       <Link href="/game3" className="font-roman text-2xl text-black hover:underline font-bold">
+     
+       
       <Image
         src={labyrinthosDiagram}
         alt="A classical labyrinth diagram"
@@ -21,8 +22,9 @@ const scrollContent = (
         className="rounded-md"
         priority
       />
+       </Link>
     </div>
-
+{/* 
     <p className="mb-4">
       Categorisation imposes order on the world, assigning labels and creating relationships between disparate pieces of information to structure complexity. This process is revealing of human bias, in the inclusion and structuring of archives.
     </p>
@@ -37,7 +39,7 @@ const scrollContent = (
       />
     </div>
 
-    <p className="mb-4">
+    <p className="mb-4 text-xl">
       Early computational intelligence relied on <strong>Expert Systems</strong> to structure knowledge as arborescent structures, navigated by following <code>IF-THEN</code> rulesets. These categories were brittle and manually encoded, relying on their programmers to decide what would be included, where, and how.
     </p>
 
@@ -55,42 +57,21 @@ const scrollContent = (
       By contrast, Large Language Models propose emergent taxonomies. Instead of a predefined decision tree, concepts rely on the <strong>statistical proximity</strong> of objects in their training data. Categories are probabilistic clusters of relative meaning, highlighting the inherent biases of that data.
     </p>
 
-    {/* Manually add the "Continue" link */}
     <div className="text-center mt-8 pt-4">
-        <Link href="/game3" className="font-roman text-xl text-black hover:underline font-bold">
-          Continue your journey >
+        <Link href="/game3" className="font-roman text-2xl text-black hover:underline font-bold">
+          Continue your journey 
         </Link>
-    </div>
+    </div> */}
   </div>
 );
 
 export default function HillPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   return (
-    <>
-      <main className="relative w-screen h-screen">
-        <Image
-          src="/media/hill.png"
-          alt="A windswept hill"
-          fill
-          style={{ objectFit: 'cover' }}
-          quality={100}
-          priority
-        />
-        <div className="absolute top-10 left-1/2 -translate-x-1/2">
-          <button onClick={() => setIsModalOpen(true)} className="font-roman text-lg border-2 border-white px-4 py-3 hover:bg-white/10">
-            look up at the sky
-          </button>
-        </div>
-      </main>
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <div className="w-full h-[80vh]">
-          <ScrollComponent>
-            {scrollContent}
-          </ScrollComponent>
-        </div>
-      </Modal>
-    </>
+    <ContentPage
+      imageSrc="Hill1.png"
+      altText="A windswept hill"
+      scrollContent={scrollContent}
+      webSocketMessage="hill"
+    />
   );
 }

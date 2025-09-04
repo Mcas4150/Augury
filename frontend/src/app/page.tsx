@@ -1,69 +1,154 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import Modal from '@/Modal';
 import ScrollComponent from '@/ScrollComponent';
+import { useWebSocket } from '@/useWebSocket';
+import BottomAugur from '@/BottomAugur';
+import { useAuspices } from '@/contexts/AuspicesProvider';
+import './../Modal.css';
 
-export default function HomePage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export default function BirdDoorsPage() {
+  const [isLeftModalOpen, setIsLeftModalOpen] = useState(false);
+  const [isMiddleModalOpen, setIsMiddleModalOpen] = useState(false);
+  const [isRightModalOpen, setIsRightModalOpen] = useState(false);
+  const [imageKey] = useState(Date.now());
+      const effectRan = useRef(false);
+      const { send } = useWebSocket();
+      const { setDoor } = useAuspices();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [harpSrc, setHarpSrc] = useState(() => {
+    try {
+      // read previous index from localStorage and toggle it
+      const prev = localStorage.getItem("augur_harp_index");
+      const next = prev === "1" ? "0" : "1";
+      localStorage.setItem("augur_harp_index", next);
+      return next === "1" ? "/media/AugursHarp2.mp3" : "/media/AugursHarp.mp3";
+    } catch (e) {
+      return "/media/AugursHarp.mp3";
+    }
+  });
 
-  const scrollContent = (
+  useEffect(() => {
+    if (effectRan.current === false) {
+      send("forumGen"); // or "shoregen", "forestgen"
+  
+      return () => {
+        effectRan.current = true;
+      };
+    }
+  }, []);
+  
+  // Try to autoplay the AugursHarp. If the browser blocks autoplay,
+  // attach a one-time user gesture listener to start playback.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    // sensible default volume
+    audio.volume = 0.5;
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        const onFirstUserGesture = () => {
+          audio.play().catch(() => {});
+          window.removeEventListener('click', onFirstUserGesture);
+          window.removeEventListener('keydown', onFirstUserGesture);
+        };
+        window.addEventListener('click', onFirstUserGesture);
+        window.addEventListener('keydown', onFirstUserGesture);
+      });
+    }
+    return () => {
+      audio.pause();
+    };
+  }, []);
+
+  const leftScrollContent = (
     <div>
-      <p className="mb-4">
-        ‘Taking auguries is believing in a world without men; inaugurating is paying homage to the real as such.’ (Serres 1995)
-      </p>
-      
+      <h1 className="modal-h1">Towards Attunement</h1>
       <div className="flex justify-center my-4">
-        <Image
-          src="/media/RomulusAugury.jpeg"
-          alt="Remus and Romulus observing the flight of birds for an omen"
-          width={400}
-          height={300}
-          className="rounded-md"
-        />
+         <Link href="/forest" className="font-roman text-2xl text-black hover:underline font-bold">
+        
+        <Image src="/media/swarm1.png" alt="Swarm 1" width={300} height={200} /></Link>
       </div>
+    </div>
+  );
 
-      <p className="mb-4">
-        Augury is an ancient practice of taking omens, or auspices, ex caelo (from the sky). At the height of the Roman Empire, this divination system was codified as a state apparatus for the hegemonic order. As an instrument of power, augury became hermeneutics for translating sky watching, including birds and the emergence of flocks, as the will of Gods to justify political expediency. This systematic modelling of natural complexity prefigures computer science concepts, pertinently those foundational to artificial life and self-organizing systems (see: Boids2).
-      </p>
-      <p>
-        Today, new forms of technological abstraction take hold in which the probabilistic and fallible outputs of generative AI models are rapidly naturalised and accepted as omniscient fact; a higher ‘intelligence’ that conveniently serves the ideological and economic interests of a technocratic, ‘rationalist’ neo-oligarchy.
-      </p>
+  const middleScrollContent = (
+    <div>
+      <h1 className="modal-h1">Towards Imitation of Life</h1>
+      <div className="flex justify-center my-4">
+         <Link href="/shore" className="font-roman text-2xl text-black hover:underline font-bold"><Image src="/media/swarm2.png" alt="Swarm 2" width={300} height={200} />
+          </Link></div>
+ 
+    </div>
+  );
+
+  const rightScrollContent = (
+    <div>
+      <h1 className="modal-h1">Towards Akasha</h1>
+      <div className="flex justify-center my-4">
+         <Link href="/hill" className="font-roman text-2xl text-black hover:underline font-bold">
+        <Image src="/media/swarm3.png" alt="Swarm 3" width={300} height={200} />
+        </Link>
+      </div>
     </div>
   );
 
   return (
     <>
+      {/* audio element placed in the document so it can be controlled via ref */}
+      <audio ref={audioRef} src={harpSrc} loop />
       <main className="relative w-screen h-screen">
-        {/* Background Image */}
         <Image
-          src="/media/Gate2.png"
-          alt="A mystical temple at night"
+          src={`/comfyui/Doorway.png?t=${imageKey}`}
+          alt="An empty throne room"
           layout="fill"
           objectFit="cover"
           quality={100}
           priority
         />
 
-        {/* The invisible door hotspot now opens the modal */}
         <button
-          onClick={() => setIsModalOpen(true)}
-          title="Enter the Templum"
-          className="absolute hover:cursor-pointer rounded-sm"
-          style={{
-            top: '52%',
-            left: '43%',
-            width: '14%',
-            height: '38%',
-          }}
+          onClick={() => { setIsLeftModalOpen(true); setDoor("attunement"); }}
+          title="Open Left Scroll"
+          className="absolute hover:cursor-pointer"
+          style={{ top: '50%', left: '18%', width: '13%', height: '30%' }}
         />
+        <button
+          onClick={() => { setIsMiddleModalOpen(true); setDoor("imitation"); }}
+          title="Open Middle Scroll"
+          className="absolute hover:cursor-pointer"
+          style={{ top: '50%', left: '44%', width: '13%', height: '30%' }}
+        />
+        <button
+          onClick={() => { setIsRightModalOpen(true); setDoor("akasha"); }}
+          title="Open Right Scroll"
+          className="absolute hover:cursor-pointer"
+          style={{ top: '50%', left: '68%', width: '13%', height: '30%' }}
+        />
+              <BottomAugur message='You are the Augur, step outside to take the auspices'/>
       </main>
 
-      {/* The Modal and its content */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <Modal isOpen={isLeftModalOpen} onClose={() => setIsLeftModalOpen(false)}>
         <div className="w-full h-[80vh]">
-          <ScrollComponent continueLink="/passage">
-            {scrollContent}
+          <ScrollComponent>
+            {leftScrollContent}
+          </ScrollComponent>
+        </div>
+      </Modal>
+      <Modal isOpen={isMiddleModalOpen} onClose={() => setIsMiddleModalOpen(false)}>
+        <div className="w-full h-[80vh]">
+          <ScrollComponent>
+            {middleScrollContent}
+          </ScrollComponent>
+        </div>
+      </Modal>
+      <Modal isOpen={isRightModalOpen} onClose={() => setIsRightModalOpen(false)}>
+        <div className="w-full h-[80vh]">
+          <ScrollComponent>
+            {rightScrollContent}
           </ScrollComponent>
         </div>
       </Modal>

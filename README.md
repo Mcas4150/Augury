@@ -38,12 +38,19 @@ curl -L -o models/llama3-8B-q4_k_m.gguf \
 
 Run Backend
 ```
-uvicorn api:app --reload --port 8000
+uvicorn app:app --host 0.0.0.0 --port 8000
 ```
 Run Fronend
 ```
 cd frontend
 npm run dev
+```
+
+Run Ollama
+```
+$env:OLLAMA_LOG_LEVEL = "debug"
+>> $env:OLLAMA_HOST = "127.0.0.1:11435"
+>> & "$env:LOCALAPPDATA\Programs\Ollama\ollama.exe" serve
 ```
 
 ## Dev Notes
